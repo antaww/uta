@@ -1,0 +1,69 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* src/index.css */
+
+/* Couleurs personnalisées */
+:root {
+  --spotify-green: #1DB954;
+  --spotify-black: #191414;
+}
+
+/* Appliquer le thème global */
+body {
+  background-color: var(--spotify-black);
+  color: white;
+}
+
+.navbar {
+  background-color: var(--spotify-black) !important;
+}
+
+.btn-success {
+  background-color: var(--spotify-green);
+  border-color: var(--spotify-green);
+}
+
+.btn-success:hover {
+  background-color: #1ed760;
+  border-color: #1ed760;
+}
+
+.table {
+  background-color: #282828;
+}
+
+.table-dark th {
+  background-color: #1DB954;
+  color: white;
+}
+
+.list-group-item {
+  background-color: #282828;
+  color: white;
+  border-color: #1DB954;
+}
+
+.list-group-item.active {
+  background-color: var(--spotify-green);
+  border-color: var(--spotify-green);
+  color: white;
+}
+
+.alert-danger {
+  background-color: #c82333;
+  color: white;
+  border-color: #bd2130;
+}
+
