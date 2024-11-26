@@ -1,10 +1,14 @@
 // src/components/Home.js
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import axios from 'axios';
 import Track from "./Like";
+import {UserContext} from '../context/UserContext';
 
 function Home() {
-	const [user, setUser] = useState(null);
+	const {
+		user,
+		setUser
+	} = useContext(UserContext);
 	const [playlists, setPlaylists] = useState([]);
 	const [selectedPlaylist, setSelectedPlaylist] = useState('');
 	const [playlistDetails, setPlaylistDetails] = useState(null);
