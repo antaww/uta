@@ -1,10 +1,11 @@
+import numpy as np
 from flask import Flask, request, jsonify, redirect, session, url_for
 from flask_cors import CORS
 from flask_session import Session
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-from sklearn.cluster import KMeans
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics.pairwise import cosine_similarity
 import os
 from dotenv import load_dotenv
 from urllib.parse import urlparse
@@ -23,13 +24,26 @@ SPOTIPY_CLIENT_ID = os.getenv('SPOTIPY_CLIENT_ID')
 SPOTIPY_CLIENT_SECRET = os.getenv('SPOTIPY_CLIENT_SECRET')
 SPOTIPY_REDIRECT_URI = os.getenv('SPOTIPY_REDIRECT_URI')
 
-scope = "user-read-private playlist-read-private playlist-read-collaborative"
-
 sp_oauth = SpotifyOAuth(
     client_id=SPOTIPY_CLIENT_ID,
     client_secret=SPOTIPY_CLIENT_SECRET,
     redirect_uri=SPOTIPY_REDIRECT_URI,
-    scope=scope
+    scope=[
+        "user-read-playback-state",
+        "user-modify-playback-state",
+        "user-read-currently-playing",
+        "playlist-read-private",
+        "playlist-read-collaborative",
+        "user-follow-modify",
+        "user-follow-read",
+        "user-read-playback-position",
+        "user-top-read",
+        "user-read-recently-played",
+        "user-library-modify",
+        "user-library-read",
+        "user-read-email",
+        "user-read-private"
+    ]
 )
 
 @app.route('/login')
@@ -155,77 +169,71 @@ def get_playlist_details():
         print(traceback.format_exc())
         return jsonify({'error': error_message}), 500
 
-@app.route('/get_suggestions', methods=['POST'])
-def get_suggestions():
+
+@app.route('/get_recommendations', methods=['GET'])
+def get_recommendations():
+    sp = get_spotify_client()
+    x = sp.current_user_top_artists(limit=2, time_range="short_term")
+    genres = {}
+    for idx, item in enumerate(x["items"]):
+        for genre in item["genres"]:
+            if genre not in genres:
+                genres[genre] = 1
+            else:
+                genres[genre] += 1
+    # get the most played genre
+    genres = {k: v for k, v in sorted(genres.items(), key=lambda item: item[1], reverse=True)}
+    genres = dict(list(genres.items())[:1])
+
+    # Step 2: Get the current user's top artists (limit to 5)
+    artists = sp.current_user_top_artists(limit=1, time_range="short_term")
+
+    # Step 3: Get the current user's top tracks (limit to 5)
+    tracks = sp.current_user_top_tracks(limit=1, time_range="short_term")
+
+    seed_genres = list(genres.keys())  # List of genres
+    seed_artists = [artist["id"] for artist in artists["items"]]  # List of artist IDs
+    seed_tracks = [track["id"] for track in tracks["items"]]  # List of track IDs
+
+    # Debug print statements
+    print(f"Seed genres: {seed_genres}")
+    print(f"Seed artists: {seed_artists}")
+    print(f"Seed tracks: {seed_tracks}")
+
+    # Step 5: Get recommendations based on seeds (genres, artists, tracks)
+    recommendations = sp.recommendations(
+        seed_artists=[seed_artists[0]],  # Convert artist list to a comma-separated string
+        seed_tracks=[seed_tracks[0]],  # Convert track list to a comma-separated string
+        seed_genres=[seed_genres[0]],  # Convert genres list to a comma-separated string
+    )
+
+    # Step 6: Print recommended tracks
+    if "tracks" in recommendations:
+        print(f"\nRecommended tracks based on your listening history:")
+        for idx, track in enumerate(recommendations["tracks"]):
+            print(f"{idx + 1} - {track['name']} by {track['artists'][0]['name']} ({track['id']})")
+
+    # Return the recommendations for further use
+    return jsonify(recommendations)
+
+@app.route('/get_playlist_suggestions', methods=['POST'])
+def get_playlist_suggestions():
     sp = get_spotify_client()
     if not sp:
         return jsonify({'error': 'Utilisateur non authentifié'}), 401
 
-    data = request.json
-    playlist_id = data.get('playlist_id')
-    if not playlist_id:
-        return jsonify({'error': 'playlist_id manquant'}), 400
-
     try:
-        # Récupérer les pistes de la playlist
-        results = sp.playlist_tracks(playlist_id)
-        tracks = results['items']
-        while results['next']:
-            results = sp.next(results)
-            tracks.extend(results['items'])
+        playlist_id = request.json['playlist_id']
+        playlist = sp.playlist(playlist_id)
+        tracks = playlist['tracks']['items']
+        all_tracks = []
+        while playlist['tracks']['next']:
+            playlist = sp.next(playlist['tracks'])
+            tracks.extend(playlist['items'])
 
-        track_ids = [item['track']['id'] for item in tracks if item['track']['id']]
-
-        if not track_ids:
-            return jsonify({'error': 'Aucune piste trouvée dans la playlist.'}), 400
-
-        # Récupérer les caractéristiques des pistes
-        features = sp.audio_features(tracks=track_ids)
-        feature_list = []
-        valid_track_ids = []
-        for feature in features:
-            if feature:
-                feature_list.append([
-                    feature['danceability'],
-                    feature['energy'],
-                    feature['key'],
-                    feature['loudness'],
-                    feature['mode'],
-                    feature['speechiness'],
-                    feature['acousticness'],
-                    feature['instrumentalness'],
-                    feature['liveness'],
-                    feature['valence'],
-                    feature['tempo']
-                ])
-                valid_track_ids.append(feature['id'])
-
-        if not feature_list:
-            return jsonify({'error': 'Aucune caractéristique trouvée pour les pistes.'}), 400
-
-        # Appliquer le clustering
-        scaler = StandardScaler()
-        scaled_features = scaler.fit_transform(feature_list)
-
-        kmeans = KMeans(n_clusters=5, random_state=42)  # Ajustez le nombre de clusters selon vos besoins
-        kmeans.fit(scaled_features)
-        labels = kmeans.labels_
-
-        # Sélectionner une piste par cluster
-        selected_tracks = []
-        for cluster in range(5):
-            cluster_indices = [i for i, label in enumerate(labels) if label == cluster]
-            if cluster_indices:
-                selected = cluster_indices[0]
-                selected_tracks.append(valid_track_ids[selected])
-                if len(selected_tracks) >= 10:
-                    break
-
-        # Récupérer les détails des pistes suggérées
-        suggested_tracks = []
-        for track_id in selected_tracks:
-            track = sp.track(track_id)
-            suggested_tracks.append({
+        for item in tracks:
+            track = item['track']
+            all_tracks.append({
                 'id': track['id'],
                 'name': track['name'],
                 'artist': ', '.join([artist['name'] for artist in track['artists']]),
@@ -234,20 +242,24 @@ def get_suggestions():
                 'external_url': track['external_urls']['spotify']
             })
 
-        return jsonify({
-            'suggestions': suggested_tracks
-        })
+        # Créer une matrice de features pour les chansons
+        features = []
+        for track in all_tracks:
+            if track['preview_url']:
+                features.append(sp.audio_features(track['id'])[0])
 
-    except spotipy.exceptions.SpotifyException as e:
-        error_message = f"SpotifyException: {str(e)}"
-        print(error_message)
-        print(traceback.format_exc())
-        return jsonify({'error': error_message}), 500
+        feature_names = ['danceability', 'energy', 'key', 'loudness', 'mode', 'speechiness',
+                         'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo']
+        X = np.array([[track[feature] for feature in feature_names] for track in features])
+        print(features)
+
+        return jsonify({'message': 'ok'})
+
     except Exception as e:
-        error_message = f"Exception: {str(e)}"
-        print(error_message)
+        print(f"Error fetching recommendations: {e}")
         print(traceback.format_exc())
-        return jsonify({'error': error_message}), 500
+        return jsonify({'error': str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
