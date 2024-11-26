@@ -1,6 +1,7 @@
 // src/components/Home.js
 import React, {useEffect, useState} from 'react';
 import axios from 'axios';
+import Track from "./Like";
 
 function Home() {
 	const [user, setUser] = useState(null);
@@ -89,7 +90,12 @@ function Home() {
 	return (
 		<div className="container my-5">
 			<h2>Bienvenue, {user.display_name}!</h2>
-			<h3 className="mt-4">Découverte</h3>
+			<div class="flex gap-4">
+				<h3 className="m-0">Découverte</h3> {recommendations.length > 0 ? (
+				<button className="btn btn-secondary m-0" onClick={fetchRecommendations}>
+					Refresh
+				</button>) : null}
+			</div>
 			{recommendations.length === 0 ? (
 				<button className="btn btn-primary mt-3" onClick={fetchRecommendations}>
 					Découvrir de la musique
@@ -124,12 +130,7 @@ function Home() {
 										'Pas de prévisualisation'
 									)}
 								</td>
-								<td>
-									<a href={track.external_url} target="_blank" rel="noopener noreferrer"
-									   className="btn btn-success btn-sm">
-										Spotify
-									</a>
-								</td>
+								<Track track={track}/>
 							</tr>
 						))}
 						</tbody>

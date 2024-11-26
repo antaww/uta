@@ -51,6 +51,42 @@ def login():
     auth_url = sp_oauth.get_authorize_url()
     return redirect(auth_url)
 
+
+@app.route('/like', methods=['POST'])
+def like():
+    sp = get_spotify_client()
+    if not sp:
+        return jsonify({'error': 'Utilisateur non authentifié'}), 401
+
+    track_id = request.json['track_id']
+    if not track_id:
+        return jsonify({'error': 'track_id manquant'}), 400
+
+    try:
+        sp.current_user_saved_tracks_add([track_id])
+        return jsonify({'message': 'ok'})
+    except Exception as e:
+        print(f"Error liking track: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/unlike', methods=['POST'])
+def unlike():
+    sp = get_spotify_client()
+    if not sp:
+        return jsonify({'error': 'Utilisateur non authentifié'}), 401
+
+    track_id = request.json['track_id']
+    if not track_id:
+        return jsonify({'error': 'track_id manquant'}), 400
+
+    try:
+        sp.current_user_saved_tracks_delete([track_id])
+        return jsonify({'message': 'ok'})
+    except Exception as e:
+        print(f"Error unliking track: {e}")
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/callback')
 def callback():
     session.clear()
