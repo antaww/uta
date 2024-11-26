@@ -34,7 +34,17 @@ function Home() {
 	const fetchPlaylists = async () => {
 		try {
 			const response = await axios.get('/get_playlists', {withCredentials: true});
-			setPlaylists(response.data);
+			const playlistsWithImages = await Promise.all(response.data.map(async (playlist) => {
+				const imageResponse = await axios.get('/get_playlist_image', {
+					params: {playlist_id: playlist.id},
+					withCredentials: true
+				});
+				return {
+					...playlist,
+					imageUrl: imageResponse.data.url
+				};
+			}));
+			setPlaylists(playlistsWithImages);
 		} catch (err) {
 			console.error(err);
 			setError('Erreur lors de la récupération des playlists.');
@@ -89,15 +99,19 @@ function Home() {
 
 	return (
 		<div className="container my-5">
-			<h2>Bienvenue, {user.display_name}!</h2>
-			<div class="flex gap-4">
-				<h3 className="m-0">Découverte</h3> {recommendations.length > 0 ? (
-				<button className="btn btn-secondary m-0" onClick={fetchRecommendations}>
+			<div class="d-flex align-items-center gap-3">
+				<img src={user.images[0].url} alt={user.display_name} className="profile-icon"/>
+				<h2 class="fat-text">Bienvenue, {user.display_name}!</h2>
+			</div>
+			<hr/>
+			<div class="gap-4 d-flex justify-content-between align-items-center">
+				<h4 className="m-0 fat-text">Découverte</h4> {recommendations.length > 0 ? (
+				<button className="btn btn-secondary m-0 fat-text transparent-btn" onClick={fetchRecommendations}>
 					Refresh
 				</button>) : null}
 			</div>
 			{recommendations.length === 0 ? (
-				<button className="btn btn-primary mt-3" onClick={fetchRecommendations}>
+				<button className="btn btn-primary mt-3 green-btn" onClick={fetchRecommendations}>
 					Découvrir de la musique
 				</button>
 			) : (
@@ -137,7 +151,8 @@ function Home() {
 					</table>
 				</div>
 			)}
-			<h3 className="mt-4">Vos Playlists</h3>
+			<hr/>
+			<h4 className="fat-text">Vos Playlists</h4>
 			{playlists.length === 0 ? (
 				<p>Vous n'avez aucune playlist.</p>
 			) : (
@@ -145,9 +160,11 @@ function Home() {
 					{playlists.map((playlist) => (
 						<button
 							key={playlist.id}
-							className={`list-group-item list-group-item-action ${selectedPlaylist === playlist.id ? 'active' : ''}`}
+							className={`d-flex gap-4 playlist-btn list-group-item list-group-item-action ${selectedPlaylist === playlist.id ? 'active' : ''}`}
 							onClick={() => handlePlaylistSelect(playlist.id)}
 						>
+							{playlist.imageUrl &&
+								<img src={playlist.imageUrl} alt={playlist.name} className="playlist-icon"/>}
 							{playlist.name}
 						</button>
 					))}
@@ -159,8 +176,9 @@ function Home() {
 			{loading && <p className="mt-4">Chargement des détails et des suggestions...</p>}
 
 			{playlistDetails && (
-				<div className="mt-5">
-					<h3>Playlist: {playlistDetails.playlist_name}</h3>
+				<div className="">
+					<hr/>
+					<h4 class="fat-text">Playlist: {playlistDetails.playlist_name}</h4>
 					<table className="table table-striped mt-3">
 						<thead className="table-dark">
 						<tr>

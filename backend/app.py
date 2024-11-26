@@ -161,6 +161,28 @@ def get_playlists():
         print(traceback.format_exc())
         return jsonify({'error': str(e)}), 500
 
+
+@app.route('/get_playlist_image', methods=['GET'])
+def get_playlist_image():
+    sp = get_spotify_client()
+    if not sp:
+        return jsonify({'error': 'Utilisateur non authentifié'}), 401
+
+    playlist_id = request.args.get('playlist_id')
+    if not playlist_id:
+        return jsonify({'error': 'playlist_id manquant'}), 400
+
+    try:
+        image = sp.playlist_cover_image(playlist_id)
+        if image:
+            return jsonify({'url': image[0]['url']})
+        else:
+            return jsonify({'url': ''})
+    except Exception as e:
+        print(f"Error fetching playlist image: {e}")
+        print(traceback.format_exc())
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/get_playlist_details', methods=['GET'])
 def get_playlist_details():
     sp = get_spotify_client()

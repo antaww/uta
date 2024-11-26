@@ -1,38 +1,146 @@
+:root {
+    --white-1: #f2f2f2;
+    --white-2: #e5e5e5;
+    --btn-color: #333333;
+    --primary-color: #121212;
+    --spotify-green: #1ed760;
+    --spotify-green-hover: #21ed6a;
+    --btn-red: #f82938;
+    --btn-red-hover: #fd3645;
+}
+
 .App {
-  text-align: center;
+    text-align: center;
 }
 
 .App-logo {
-  height: 40vmin;
-  pointer-events: none;
+    height: 40vmin;
+    pointer-events: none;
+}
+
+body, .container, .navbar {
+    background-color: var(--primary-color) !important;
+    color: var(--white-1) !important;
+    text-decoration: none !important;
+}
+
+.navbar {
+    background: linear-gradient(98.85deg, rgba(18, 18, 18, 0.3) 0%, var(--primary-color) 100%), linear-gradient(180deg, rgba(18, 18, 18, 0) 0%, var(--primary-color) 100%), var(--spotify-green) !important;
+}
+
+.navbar-brand {
+    color: var(--white-1) !important;
+}
+
+.green-btn {
+    background-color: var(--spotify-green) !important;
+    border-color: var(--spotify-green) !important;
+    color: var(--primary-color) !important;
+    font-weight: 700 !important;
+    padding: 0.5rem 2rem !important;
+    transition: all 0.5s !important;
+}
+
+.green-btn:hover {
+    background-color: var(--spotify-green-hover) !important;
+}
+
+.red-btn {
+    background-color: var(--btn-red) !important;
+    border-color: var(--btn-red) !important;
+    color: var(--white-1) !important;
+    font-weight: 700 !important;
+    padding: 0.5rem 2rem !important;
+    transition: all 0.5s !important;
+}
+
+.red-btn:hover {
+    background-color: var(--btn-red-hover) !important;
+}
+
+.transparent-btn {
+    background-color: transparent !important;
+    border-color: var(--white-1) !important;
+    color: var(--white-1) !important;
+    font-weight: 700 !important;
+    padding: 0.5rem 2rem !important;
+    transition: all 0.5s !important;
+}
+
+.transparent-btn:hover {
+    background-color: var(--white-1) !important;
+    color: var(--primary-color) !important;
+}
+
+.fat-text {
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+}
+
+table, th, td {
+    background: transparent !important;
+    color: var(--white-1) !important;
+}
+
+.profile-icon {
+    border: 4px solid var(--white-1);
+    border-radius: 50%;
+    height: 6rem;
+    object-fit: cover;
+    width: 6rem;
+}
+
+tr:last-child {
+    border-bottom: transparent !important;
+}
+
+.playlist-btn {
+    align-items: center;
+    background-color: transparent !important;
+    border: none !important;
+    color: var(--white-1) !important;
+    display: flex;
+    font-weight: 700 !important;
+    gap: 2rem;
+    transition: all 0.5s !important;
+}
+
+.playlist-btn:hover {
+    background-color: var(--btn-color) !important;
+}
+
+.playlist-icon {
+    height: 3rem;
+    object-fit: cover;
+    width: 3rem;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+    .App-logo {
+        animation: App-logo-spin infinite 20s linear;
+    }
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+    align-items: center;
+    background-color: #121212;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    font-size: calc(10px + 2vmin);
+    justify-content: center;
+    min-height: 100vh;
 }
 
 .App-link {
-  color: #61dafb;
+    color: #61dafb;
 }
 
 @keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }

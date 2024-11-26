@@ -18,7 +18,7 @@ function Track({track}) {
 
 	return (
 		<td>
-			<button className={`btn btn-sm ${liked ? 'btn-danger' : 'btn-success'}`} onClick={handleLikeToggle}>
+			<button className={`btn btn-sm ${liked ? 'red-btn' : 'green-btn'}`} onClick={handleLikeToggle}>
 				{liked ? 'Unlike' : 'Like'}
 			</button>
 		</td>
