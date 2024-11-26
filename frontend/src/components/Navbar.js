@@ -8,7 +8,7 @@ function Navbar() {
   };
 
   const handleLogout = () => {
-    window.location.href = 'http://localhost:5000/logout';
+    window.location.href = 'http://localhost:3000/logout';
   };
 
   return (
