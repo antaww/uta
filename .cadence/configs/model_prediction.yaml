@@ -1,0 +1,56 @@
+project_name: Default
+working_dir: exploration
+cmd:
+- python model_prediction.py
+provisioning:
+  gpu_type: a10g
+  gpu_count: 1
+  cpu_count: 32
+  ram: 128
+teamcity:
+  url: https://mlops.staging.sandbox.teamcity.aws.intellij.net
+  build_conf_id: id68eafec2fcf54184bbb253fff61d0256_JetTrain
+env:
+  variables:
+    PYTHONUNBUFFERED: "1"
+  python:
+    pip:
+      requirements_path: requirements.txt
+    version: 3.12.3
+  secrets:
+    variables: {}
+    ssh_keys: []
+  aws:
+    sync_config: false
+    sync_credentials: false
+    sync_cache: false
+project_sync:
+  local:
+    root: "."
+    storage_name: Cadence Storage
+    uri: ""
+    exclude:
+    - /.venv/**
+    include: []
+    sync_back: false
+    snapshots: true
+    storage_type: DEFAULT
+inputs: []
+outputs:
+- type: OUTPUT
+  storage_name: Cadence Storage
+  uri: ""
+  path: "."
+  acceleration: false
+  storage_type: DEFAULT
+mounts: []
+storages:
+- name: Cadence Storage
+  storage_type: s3
+  credentials:
+    access_key_id: ASIASYCYVCDCSQLMYW3H
+    secret_access_key: g1xvuAnMEZQwfM6vbCz+ctgGQikR5hl2Cf79pNp1
+    session_token: IQoJb3JpZ2luX2VjECAaCWV1LXdlc3QtMSJHMEUCIGVcWgOxQ6IcOXnPbhn4xDS6lc6FmLJHKe3LE7ZL8Yz3AiEAsTs+t2Dyr9j46hRleKZXORlF6bzZtzNpDA0MROTuDNIqswUI2f//////////ARABGgwxODkxNjQ0OTA5NDkiDGFWx1RzFXlYElwVWiqHBdaJXrVIlAzdJaxLgfVAW7KhBydzkS1qhVYPx3DPqYwrUFU5XvwVh3/317Bsvrgbqa/HCX7Zuj6ksnIombMAH4+0eqe0nclhGykzL089hNHI1ZCKt8dejUg58138bkgFYfhxqpfOsIuA/A78YHWtcrS2Ofjz9WaU940cwTYd+uhHeLw8AdVT0DApST6OKMqM5f3mNzFyVZxWZVfZE0JjK+dnaDhmcjP1++q9qwf7VkFNg+aVUOmljVVwhzCiPuLFtj0O+hp6t/vALUTxIbrVYFM5stiK/R8ju0PkJTDswjcoM2PT/PgraOy50FVhexOnIZ3OlpsaVVWsM4E+9E1thMKMbbIdT393j/r487F+dXI8Q6GIyWzPzSibOiiUSdj+acrlyfGtVaLAh3WpJ7ZWhmAElopOm19FH4ddTVhoVcByjZPvc/WpznZYgkRJhPkU6M2r33pgkQbtyFBEaDwbjjHeJ41y7muoDQzA6dXShJOE62t+DjCGyX08eElKHnXd3EXySnVVB6UgFUvNa6JQMcbcrYAUFD7s8czr5gaK+EvnOsz+smPbtkZEyXcNELGL0V3eQmnb+slGBmoPHW9RNbcANlFPuVRMXT0sYJBV1sP/AapVUVqj9eYh1m/CUGvDRVL7UnQICTg1gtKpH2WZiSiZ0/a+XnqaQ3ZBZlAzTPveDkRLRYFCPn1grE5xbzDgdl5Vo3tZiePETjs/vhpTZTgiktCnqa/l5JCnBxTfPPv5jeXp/5WybaIpdgq6r3neQ1bMXrzQuoj1sjFlcs9o6EW4/j5YABI+gBTOAXL/mNB3nWI4UaGW5h2Log5yyTjv0Jxs8iL5NjUmeQ8jr/Ss60RKetpaNReQMI2r8boGOoUCBB3wsKuBPRfFIGbh5xCAy7Aexefu6E3DHcp7iG7cMgrAE5navnSfRcQ7+lbXSVtue6hKGbSmeWEXFPc/xKtiwMjSEM57TnveAS7Kj1lJqyL3+d4CMrQwKI83iCFNvJ4p8jb+aFWOiliMDT8qypaAuW6ZGJ5nrS5l6637s7nWJ3tZSAXi1xI0q+DKGemsmOFjxPJhiwcEVA0sFxaFxsGcpc5Db+Blb2vLqgmHlN4rz1x6Ep8cRXxfUXxb2Q+XnG8aS9mxdAgeBGp07Jy1W1yzO2fpQpdz/qu81oIpCgkuiQjsgLjwatj2evy4rpY1MBg2IjTijNnvO4JZUVpLasZN1Jucwy4e
+    bucket: jb-cadence-storage
+    type: DEFAULT
+description: ""
