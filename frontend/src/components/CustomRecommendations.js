@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import ArtistSearch from './ArtistSearch';
 
-function CustomRecommendations({ onGetRecommendations }) {
+function CustomRecommendations({ onGetRecommendations, targetPopularity }) {
     const [selectedArtists, setSelectedArtists] = useState([]);
     const [selectedTracks, setSelectedTracks] = useState([]);
     const [selectedGenres, setSelectedGenres] = useState([]);
@@ -113,7 +113,8 @@ function CustomRecommendations({ onGetRecommendations }) {
             const response = await axios.post('/get_custom_recommendations', {
                 artists: selectedArtists.map(artist => artist.id),
                 tracks: selectedTracks.map(track => track.id),
-                genres: selectedGenres
+                genres: selectedGenres,
+                target_popularity: targetPopularity
             }, { withCredentials: true });
             
             onGetRecommendations(response.data);

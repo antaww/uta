@@ -37,6 +37,7 @@ function Home() {
 	const [loadingRecommendations, setLoadingRecommendations] = useState(false);
 	const [showHistoryModal, setShowHistoryModal] = useState(false);
 	const [showCustomModal, setShowCustomModal] = useState(false);
+	const [targetPopularity, setTargetPopularity] = useState(50);
 
 	useEffect(() => {
 		// Vérifier si l'utilisateur est authentifié
@@ -79,7 +80,10 @@ function Home() {
 	const fetchHistoryRecommendations = async () => {
 		setLoadingRecommendations(true);
 		try {
-			const response = await axios.get('/get_recommendations', {withCredentials: true});
+			const response = await axios.get('/get_recommendations', {
+				params: { target_popularity: targetPopularity },
+				withCredentials: true
+			});
 			setHistoryRecommendations(response.data);
 		} catch (err) {
 			console.error(err);
@@ -131,11 +135,29 @@ function Home() {
 
 	return (
 		<div className="container my-5">
-			<div class="d-flex align-items-center gap-3">
+			<div className="d-flex align-items-center gap-3">
 				<img src={user.images[0].url} alt={user.display_name} className="profile-icon"/>
-				<h2 class="fat-text">Welcome, {user.display_name}!</h2>
+				<h2 className="fat-text">Welcome, {user.display_name}!</h2>
 			</div>
 			<hr/>
+
+			<div className="mb-4">
+				<h5>Target Popularity for Recommendations</h5>
+				<div className="d-flex align-items-center">
+					<input
+						type="range"
+						className="form-range"
+						min="0"
+						max="100"
+						value={targetPopularity}
+						onChange={(e) => setTargetPopularity(parseInt(e.target.value))}
+					/>
+					<span className="ms-2">{targetPopularity}</span>
+				</div>
+				<small>
+					Higher values will recommend more popular tracks
+				</small>
+			</div>
 
 			<RecommendationSection 
 				title="Recommendations based on your History"
@@ -152,7 +174,10 @@ function Home() {
 				showRefreshButton={false}
 				onShowDetails={() => setShowCustomModal(true)}
 				customContent={
-					<CustomRecommendations onGetRecommendations={handleCustomRecommendations} />
+					<CustomRecommendations 
+						onGetRecommendations={handleCustomRecommendations} 
+						targetPopularity={targetPopularity}
+					/>
 				}
 			/>
 

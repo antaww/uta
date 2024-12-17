@@ -237,6 +237,10 @@ def get_recommendations():
         return jsonify({'error': 'User not authenticated'}), 401
 
     try:
+        target_popularity = int(request.args.get('target_popularity', 50))
+        min_popularity = max(0, target_popularity - 10)
+        max_popularity = min(100, target_popularity + 10)
+
         # Récupérer le pays de l'utilisateur
         user_info = sp.current_user()
         market = user_info['country']
@@ -311,7 +315,8 @@ def get_recommendations():
                     seed_genres=seed_genres[i:i+3],    # Utiliser différents genres à chaque fois
                     limit=30,
                     market=market,
-                    min_popularity=20 + (i * 20)  # Varier la popularité pour plus de diversité
+                    min_popularity=min_popularity,
+                    max_popularity=max_popularity
                 )
                 
                 for track in recommendations_results['tracks']:
@@ -331,7 +336,7 @@ def get_recommendations():
                     seed_tracks=[seed_track],
                     limit=10,
                     market=market,
-                    min_popularity=30  # Ajouter un seuil minimum de popularité
+                    min_popularity=min_popularity
                 )
                 for track in results['tracks']:
                     if track['id'] not in recent_track_ids:
@@ -507,6 +512,10 @@ def get_custom_recommendations():
 
     try:
         data = request.json
+        target_popularity = int(data.get('target_popularity', 50))
+        min_popularity = max(0, target_popularity - 10)
+        max_popularity = min(100, target_popularity + 10)
+
         seed_artists = data.get('artists', [])[:5]
         seed_tracks = data.get('tracks', [])[:5]
         seed_genres = data.get('genres', [])[:3]
@@ -543,7 +552,8 @@ def get_custom_recommendations():
                     seed_tracks=seed_tracks,
                     limit=min(10 * len(seed_tracks), 20),  # Limiter le nombre total
                     market=market,
-                    min_popularity=30
+                    min_popularity=min_popularity,
+                    max_popularity=max_popularity
                 )
                 for track in results['tracks']:
                     similar_tracks.append({
@@ -561,7 +571,8 @@ def get_custom_recommendations():
                     seed_genres=seed_genres,
                     limit=min(10 * len(seed_genres), 20),  # Limiter le nombre total
                     market=market,
-                    min_popularity=30
+                    min_popularity=min_popularity,
+                    max_popularity=max_popularity
                 )
                 for track in results['tracks']:
                     similar_tracks.append({
