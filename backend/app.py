@@ -241,8 +241,8 @@ def get_recommendations():
         market = user_info['country']
 
         # 1. Récupérer l'historique d'écoute récent et les top artistes
-        recent_tracks = sp.current_user_recently_played(limit=30)
-        top_artists_data = sp.current_user_top_artists(limit=10, time_range='short_term')
+        recent_tracks = sp.current_user_recently_played(limit=50)
+        top_artists_data = sp.current_user_top_artists(limit=20, time_range='medium_term')
         
         # Formater l'historique d'écoute
         recent_tracks_formatted = []
@@ -278,8 +278,8 @@ def get_recommendations():
                 genre_counts[genre] = genre_counts.get(genre, 0) + 1
 
         # Obtenir les top artistes et genres
-        top_artists = sorted(artist_counts.items(), key=lambda x: x[1]['count'], reverse=True)[:5]
-        top_genres = sorted(genre_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+        top_artists = sorted(artist_counts.items(), key=lambda x: x[1]['count'], reverse=True)[:8]
+        top_genres = sorted(genre_counts.items(), key=lambda x: x[1], reverse=True)[:8]
         
         # Collecter des pistes similaires
         similar_tracks = []
@@ -287,9 +287,8 @@ def get_recommendations():
         # À partir des top artistes de l'utilisateur
         for artist in top_artists_data['items']:
             try:
-                # Ajouter le paramètre market pour top_tracks
                 top_tracks = sp.artist_top_tracks(artist['id'], country=market)['tracks']
-                for track in top_tracks[:5]:
+                for track in top_tracks[:10]:
                     if track['id'] not in recent_track_ids:
                         similar_tracks.append({
                             'track': track,
@@ -299,37 +298,39 @@ def get_recommendations():
                 print(f"Erreur lors de la récupération des tracks pour {artist['name']}: {e}")
                 continue
 
-        # À partir des genres et artistes, utiliser recommendations au lieu de search
-        seed_artists = [artist_id for artist_id, _ in top_artists[:2]]  # Prendre 2 artistes max
-        seed_genres = [genre for genre, _ in top_genres[:3]]  # Prendre 3 genres max
+        # À partir des genres et artistes
+        seed_artists = [artist_id for artist_id, _ in top_artists[:4]]
+        seed_genres = [genre for genre, _ in top_genres[:5]]
         
         try:
-            # Utiliser l'API recommendations
-            recommendations_results = sp.recommendations(
-                seed_artists=seed_artists,
-                seed_genres=seed_genres,
-                limit=20,
-                market=market
-            )
-            
-            for track in recommendations_results['tracks']:
-                if track['id'] not in recent_track_ids:
-                    similar_tracks.append({
-                        'track': track,
-                        'source': f"Recommendation basée sur vos goûts"
-                    })
+            # Faire plusieurs appels avec différents paramètres pour plus de variété
+            for i in range(2):  # Faire 2 appels différents
+                recommendations_results = sp.recommendations(
+                    seed_artists=seed_artists[i:i+2],  # Utiliser différents artistes à chaque fois
+                    seed_genres=seed_genres[i:i+3],    # Utiliser différents genres à chaque fois
+                    limit=30,
+                    market=market,
+                    min_popularity=20 + (i * 20)  # Varier la popularité pour plus de diversité
+                )
+                
+                for track in recommendations_results['tracks']:
+                    if track['id'] not in recent_track_ids:
+                        similar_tracks.append({
+                            'track': track,
+                            'source': f"Recommendation basée sur vos goûts"
+                        })
         except Exception as e:
             print(f"Erreur lors de la récupération des recommendations: {e}")
 
         # Rechercher des tracks similaires aux dernières écoutes
-        for recent_track in recent_tracks_formatted[:5]:
+        for recent_track in recent_tracks_formatted[:10]:
             try:
-                # Utiliser recommendations au lieu de search
                 seed_track = recent_track['id']
                 results = sp.recommendations(
                     seed_tracks=[seed_track],
-                    limit=5,
-                    market=market
+                    limit=10,
+                    market=market,
+                    min_popularity=30  # Ajouter un seuil minimum de popularité
                 )
                 for track in results['tracks']:
                     if track['id'] not in recent_track_ids:
@@ -341,9 +342,9 @@ def get_recommendations():
                 print(f"Erreur lors de la recherche de similaires pour {recent_track['name']}: {e}")
                 continue
 
-        # Mélanger et sélectionner les recommandations
+        # Mélanger et sélectionner plus de recommandations
         random.shuffle(similar_tracks)
-        recommendations = similar_tracks[:40]
+        recommendations = similar_tracks[:80]  # Augmenté à 80
 
         # Formater la réponse
         formatted_response = {
