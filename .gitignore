@@ -1,8 +1,12 @@
 .idea
 .venv
-backend/flask_session
-exploration/flask_session
-backend/.cache
 .cadence
+
+backend/flask_session
+backend/.cache
+backend/__pycache__
+
+exploration/flask_session
+
 frontend/node_modules
 
