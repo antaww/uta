@@ -67,3 +67,32 @@ body {
   border-color: #bd2130;
 }
 
+.track-preview {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0.5rem 0;
+}
+
+.album-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+audio {
+    height: 32px;
+    border-radius: 20px;
+    background-color: var(--spotify-black);
+}
+
+audio::-webkit-media-controls-panel {
+    background-color: var(--spotify-black);
+}
+
+audio::-webkit-media-controls-current-time-display,
+audio::-webkit-media-controls-time-remaining-display {
+    color: white;
+}
+

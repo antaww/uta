@@ -177,7 +177,18 @@ function Home() {
 									<td>{index + 1}</td>
 									<td>{track.name}</td>
 									<td>{track.artists ? track.artists.map(artist => artist.name).join(', ') : 'Artiste inconnu'}</td>
-									<td>{track.album ? track.album.name : 'Album inconnu'}</td>
+									<td>
+										<div className="d-flex align-items-center">
+											{track.album?.images?.[2]?.url && (
+												<img 
+													src={track.album.images[2].url} 
+													alt={track.album.name} 
+													style={{width: '40px', height: '40px', marginRight: '10px'}}
+												/>
+											)}
+											{track.album ? track.album.name : 'Album inconnu'}
+										</div>
+									</td>
 									<td>
 										{track.preview_url ? (
 											<audio controls>

@@ -236,6 +236,10 @@ def get_recommendations():
         return jsonify({'error': 'User not authenticated'}), 401
 
     try:
+        # Récupérer le pays de l'utilisateur
+        user_info = sp.current_user()
+        market = user_info['country']
+
         # 1. Récupérer l'historique d'écoute récent et les top artistes
         recent_tracks = sp.current_user_recently_played(limit=30)
         top_artists_data = sp.current_user_top_artists(limit=10, time_range='short_term')
@@ -283,7 +287,8 @@ def get_recommendations():
         # À partir des top artistes de l'utilisateur
         for artist in top_artists_data['items']:
             try:
-                top_tracks = sp.artist_top_tracks(artist['id'])['tracks']
+                # Ajouter le paramètre market pour top_tracks
+                top_tracks = sp.artist_top_tracks(artist['id'], country=market)['tracks']
                 for track in top_tracks[:5]:
                     if track['id'] not in recent_track_ids:
                         similar_tracks.append({
@@ -294,30 +299,39 @@ def get_recommendations():
                 print(f"Erreur lors de la récupération des tracks pour {artist['name']}: {e}")
                 continue
 
-        # À partir des genres
-        for genre, _ in top_genres:
-            try:
-                # Rechercher des tracks par genre
-                results = sp.search(q=f"genre:{genre}", type='track', limit=10)
-                for track in results['tracks']['items']:
-                    if track['id'] not in recent_track_ids:
-                        similar_tracks.append({
-                            'track': track,
-                            'source': f"Genre: {genre}"
-                        })
-            except Exception as e:
-                print(f"Erreur lors de la recherche du genre {genre}: {e}")
-                continue
+        # À partir des genres et artistes, utiliser recommendations au lieu de search
+        seed_artists = [artist_id for artist_id, _ in top_artists[:2]]  # Prendre 2 artistes max
+        seed_genres = [genre for genre, _ in top_genres[:3]]  # Prendre 3 genres max
+        
+        try:
+            # Utiliser l'API recommendations
+            recommendations_results = sp.recommendations(
+                seed_artists=seed_artists,
+                seed_genres=seed_genres,
+                limit=20,
+                market=market
+            )
+            
+            for track in recommendations_results['tracks']:
+                if track['id'] not in recent_track_ids:
+                    similar_tracks.append({
+                        'track': track,
+                        'source': f"Recommendation basée sur vos goûts"
+                    })
+        except Exception as e:
+            print(f"Erreur lors de la récupération des recommendations: {e}")
 
         # Rechercher des tracks similaires aux dernières écoutes
         for recent_track in recent_tracks_formatted[:5]:
             try:
-                results = sp.search(
-                    q=f"track:{recent_track['name']} artist:{recent_track['artists'][0]}", 
-                    type='track', 
-                    limit=5
+                # Utiliser recommendations au lieu de search
+                seed_track = recent_track['id']
+                results = sp.recommendations(
+                    seed_tracks=[seed_track],
+                    limit=5,
+                    market=market
                 )
-                for track in results['tracks']['items']:
+                for track in results['tracks']:
                     if track['id'] not in recent_track_ids:
                         similar_tracks.append({
                             'track': track,
@@ -340,7 +354,11 @@ def get_recommendations():
                 'top_genres': [{'name': genre, 'count': count} for genre, count in top_genres]
             }
         }
-        
+
+        print(f"Recommendations: {formatted_response}")
+        preview_count = sum(1 for item in recommendations if item['track']['preview_url'] is not None)
+        print(f"Nombre de previews disponibles : {preview_count}/{len(recommendations)}")
+        # todo: fix no preview available (0/40)
         return jsonify(formatted_response)
         
     except Exception as e:
