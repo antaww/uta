@@ -23,6 +23,7 @@ function Home() {
 	});
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
+	const [loadingRecommendations, setLoadingRecommendations] = useState(false);
 
 	useEffect(() => {
 		// Vérifier si l'utilisateur est authentifié
@@ -63,12 +64,15 @@ function Home() {
 	};
 
 	const fetchRecommendations = async () => {
+		setLoadingRecommendations(true);
 		try {
 			const response = await axios.get('/get_recommendations', {withCredentials: true});
 			setRecommendations(response.data);
 		} catch (err) {
 			console.error(err);
 			setError(err.response?.data?.error || 'Erreur lors de la récupération des recommandations.');
+		} finally {
+			setLoadingRecommendations(false);
 		}
 	};
 
@@ -116,50 +120,80 @@ function Home() {
 			</div>
 			<hr/>
 			<div class="gap-4 d-flex justify-content-between align-items-center">
-				<h4 className="m-0 fat-text">Découverte</h4> {recommendations.tracks.length > 0 ? (
-				<button className="btn btn-secondary m-0 fat-text transparent-btn" onClick={fetchRecommendations}>
-					Refresh
-				</button>) : null}
+				<h4 className="m-0 fat-text">Découverte</h4> 
+				{recommendations.tracks.length > 0 ? (
+					<button 
+						className="btn btn-secondary m-0 fat-text transparent-btn" 
+						onClick={fetchRecommendations}
+						disabled={loadingRecommendations}
+					>
+						{loadingRecommendations ? (
+							<span>
+								<span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+								Chargement...
+							</span>
+						) : 'Refresh'}
+					</button>
+				) : null}
 			</div>
+
 			{recommendations.tracks.length === 0 ? (
-				<button className="btn btn-primary mt-3 green-btn" onClick={fetchRecommendations}>
-					Découvrir de la musique
+				<button 
+					className="btn btn-primary mt-3 green-btn" 
+					onClick={fetchRecommendations}
+					disabled={loadingRecommendations}
+				>
+					{loadingRecommendations ? (
+						<span>
+							<span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+							Recherche de musiques...
+						</span>
+					) : 'Découvrir de la musique'}
 				</button>
 			) : (
 				<div className="mt-3">
-					<table className="table table-striped mt-3">
-						<thead className="table-dark">
-						<tr>
-							<th>#</th>
-							<th>Nom</th>
-							<th>Artiste</th>
-							<th>Album</th>
-							<th>Écouter</th>
-							<th>Spotify</th>
-						</tr>
-						</thead>
-						<tbody>
-						{recommendations.tracks.map((track, index) => (
-							<tr key={track.id}>
-								<td>{index + 1}</td>
-								<td>{track.name}</td>
-								<td>{track.artists ? track.artists.map(artist => artist.name).join(', ') : 'Artiste inconnu'}</td>
-								<td>{track.album ? track.album.name : 'Album inconnu'}</td>
-								<td>
-									{track.preview_url ? (
-										<audio controls>
-											<source src={track.preview_url} type="audio/mpeg"/>
-											Votre navigateur ne supporte pas l'élément audio.
-										</audio>
-									) : (
-										'Pas de prévisualisation'
-									)}
-								</td>
-								<Track track={track}/>
+					{loadingRecommendations ? (
+						<div className="text-center my-5">
+							<div className="spinner-border text-success" role="status">
+								<span className="visually-hidden">Chargement...</span>
+							</div>
+							<p className="mt-2">Recherche de nouvelles recommandations...</p>
+						</div>
+					) : (
+						<table className="table table-striped mt-3">
+							<thead className="table-dark">
+							<tr>
+								<th>#</th>
+								<th>Nom</th>
+								<th>Artiste</th>
+								<th>Album</th>
+								<th>Écouter</th>
+								<th>Spotify</th>
 							</tr>
-						))}
-						</tbody>
-					</table>
+							</thead>
+							<tbody>
+							{recommendations.tracks.map((track, index) => (
+								<tr key={track.id}>
+									<td>{index + 1}</td>
+									<td>{track.name}</td>
+									<td>{track.artists ? track.artists.map(artist => artist.name).join(', ') : 'Artiste inconnu'}</td>
+									<td>{track.album ? track.album.name : 'Album inconnu'}</td>
+									<td>
+										{track.preview_url ? (
+											<audio controls>
+												<source src={track.preview_url} type="audio/mpeg"/>
+												Votre navigateur ne supporte pas l'élément audio.
+											</audio>
+										) : (
+											'Pas de prévisualisation'
+										)}
+									</td>
+									<Track track={track}/>
+								</tr>
+							))}
+							</tbody>
+						</table>
+					)}
 				</div>
 			)}
 			<hr/>
@@ -270,7 +304,7 @@ function Home() {
 
 			{recommendations.tracks.length > 0 && (
 				<div className="mt-4">
-					<h4 className="fat-text">Basé sur vos écoutes récentes</h4>
+					<h4 className="fat-text">Recommandations basées sur vos écoutes récentes</h4>
 					
 					{/* Top Artists */}
 					<div className="mb-3">
