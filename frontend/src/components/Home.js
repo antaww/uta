@@ -13,7 +13,14 @@ function Home() {
 	const [selectedPlaylist, setSelectedPlaylist] = useState('');
 	const [playlistDetails, setPlaylistDetails] = useState(null);
 	const [suggestedTracks, setSuggestedTracks] = useState([]);
-	const [recommendations, setRecommendations] = useState([]);
+	const [recommendations, setRecommendations] = useState({
+		tracks: [],
+		based_on: {
+			recent_tracks: [],
+			top_artists: [],
+			top_genres: []
+		}
+	});
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
 
@@ -58,7 +65,7 @@ function Home() {
 	const fetchRecommendations = async () => {
 		try {
 			const response = await axios.get('/get_recommendations', {withCredentials: true});
-			setRecommendations(response.data.tracks);
+			setRecommendations(response.data);
 		} catch (err) {
 			console.error(err);
 			setError(err.response?.data?.error || 'Erreur lors de la récupération des recommandations.');
@@ -109,12 +116,12 @@ function Home() {
 			</div>
 			<hr/>
 			<div class="gap-4 d-flex justify-content-between align-items-center">
-				<h4 className="m-0 fat-text">Découverte</h4> {recommendations.length > 0 ? (
+				<h4 className="m-0 fat-text">Découverte</h4> {recommendations.tracks.length > 0 ? (
 				<button className="btn btn-secondary m-0 fat-text transparent-btn" onClick={fetchRecommendations}>
 					Refresh
 				</button>) : null}
 			</div>
-			{recommendations.length === 0 ? (
+			{recommendations.tracks.length === 0 ? (
 				<button className="btn btn-primary mt-3 green-btn" onClick={fetchRecommendations}>
 					Découvrir de la musique
 				</button>
@@ -132,7 +139,7 @@ function Home() {
 						</tr>
 						</thead>
 						<tbody>
-						{recommendations.map((track, index) => (
+						{recommendations.tracks.map((track, index) => (
 							<tr key={track.id}>
 								<td>{index + 1}</td>
 								<td>{track.name}</td>
@@ -258,6 +265,59 @@ function Home() {
 						))}
 						</tbody>
 					</table>
+				</div>
+			)}
+
+			{recommendations.tracks.length > 0 && (
+				<div className="mt-4">
+					<h4 className="fat-text">Basé sur vos écoutes récentes</h4>
+					
+					{/* Top Artists */}
+					<div className="mb-3">
+						<h5>Artistes les plus écoutés :</h5>
+						<ul className="list-unstyled">
+							{recommendations.based_on?.top_artists.map((artist, index) => (
+								<li key={index} className="mb-1">
+									{artist.name} ({artist.count} écoutes)
+								</li>
+							))}
+						</ul>
+					</div>
+
+					{/* Top Genres */}
+					<div className="mb-3">
+						<h5>Genres les plus écoutés :</h5>
+						<ul className="list-unstyled">
+							{recommendations.based_on?.top_genres.map((genre, index) => (
+								<li key={index} className="mb-1">
+									{genre.name} ({genre.count} écoutes)
+								</li>
+							))}
+						</ul>
+					</div>
+
+					{/* Recent Tracks */}
+					<div className="mb-3">
+						<h5>Dernières écoutes :</h5>
+						<table className="table table-sm">
+							<thead>
+								<tr>
+									<th>Titre</th>
+									<th>Artiste(s)</th>
+									<th>Album</th>
+								</tr>
+							</thead>
+							<tbody>
+								{recommendations.based_on?.recent_tracks.map((track, index) => (
+									<tr key={index}>
+										<td>{track.name}</td>
+										<td>{track.artists.join(', ')}</td>
+										<td>{track.album}</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
 				</div>
 			)}
 		</div>

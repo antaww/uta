@@ -10,6 +10,7 @@ import os
 from dotenv import load_dotenv
 from urllib.parse import urlparse
 import traceback
+import random
 
 load_dotenv()
 
@@ -231,48 +232,121 @@ def get_playlist_details():
 @app.route('/get_recommendations', methods=['GET'])
 def get_recommendations():
     sp = get_spotify_client()
-    x = sp.current_user_top_artists(limit=2, time_range="short_term")
-    genres = {}
-    for idx, item in enumerate(x["items"]):
-        for genre in item["genres"]:
-            if genre not in genres:
-                genres[genre] = 1
-            else:
-                genres[genre] += 1
-    # get the most played genre
-    genres = {k: v for k, v in sorted(genres.items(), key=lambda item: item[1], reverse=True)}
-    genres = dict(list(genres.items())[:1])
+    if not sp:
+        return jsonify({'error': 'Utilisateur non authentifié'}), 401
 
-    # Step 2: Get the current user's top artists (limit to 5)
-    artists = sp.current_user_top_artists(limit=1, time_range="short_term")
+    try:
+        # 1. Récupérer l'historique d'écoute récent et les top artistes
+        recent_tracks = sp.current_user_recently_played(limit=30)
+        top_artists_data = sp.current_user_top_artists(limit=10, time_range='short_term')
+        
+        # Formater l'historique d'écoute
+        recent_tracks_formatted = []
+        recent_track_ids = set()
+        artist_counts = {}
+        genre_counts = {}
+        
+        # Traiter l'historique récent
+        for item in recent_tracks['items']:
+            track = item['track']
+            recent_track_ids.add(track['id'])
+            recent_tracks_formatted.append({
+                'id': track['id'],
+                'name': track['name'],
+                'artists': [artist['name'] for artist in track['artists']],
+                'album': track['album']['name']
+            })
+            
+            # Compter les artistes et genres
+            for artist in track['artists']:
+                artist_id = artist['id']
+                if artist_id not in artist_counts:
+                    artist_counts[artist_id] = {
+                        'count': 1,
+                        'name': artist['name']
+                    }
+                else:
+                    artist_counts[artist_id]['count'] += 1
 
-    # Step 3: Get the current user's top tracks (limit to 5)
-    tracks = sp.current_user_top_tracks(limit=1, time_range="short_term")
+        # Collecter les genres des top artistes
+        for artist in top_artists_data['items']:
+            for genre in artist['genres']:
+                genre_counts[genre] = genre_counts.get(genre, 0) + 1
 
-    seed_genres = list(genres.keys())  # List of genres
-    seed_artists = [artist["id"] for artist in artists["items"]]  # List of artist IDs
-    seed_tracks = [track["id"] for track in tracks["items"]]  # List of track IDs
+        # Obtenir les top artistes et genres
+        top_artists = sorted(artist_counts.items(), key=lambda x: x[1]['count'], reverse=True)[:5]
+        top_genres = sorted(genre_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+        
+        # Collecter des pistes similaires
+        similar_tracks = []
+        
+        # À partir des top artistes de l'utilisateur
+        for artist in top_artists_data['items']:
+            try:
+                top_tracks = sp.artist_top_tracks(artist['id'])['tracks']
+                for track in top_tracks[:5]:
+                    if track['id'] not in recent_track_ids:
+                        similar_tracks.append({
+                            'track': track,
+                            'source': f"Top artiste: {artist['name']}"
+                        })
+            except Exception as e:
+                print(f"Erreur lors de la récupération des tracks pour {artist['name']}: {e}")
+                continue
 
-    # Debug print statements
-    print(f"Seed genres: {seed_genres}")
-    print(f"Seed artists: {seed_artists}")
-    print(f"Seed tracks: {seed_tracks}")
+        # À partir des genres
+        for genre, _ in top_genres:
+            try:
+                # Rechercher des tracks par genre
+                results = sp.search(q=f"genre:{genre}", type='track', limit=10)
+                for track in results['tracks']['items']:
+                    if track['id'] not in recent_track_ids:
+                        similar_tracks.append({
+                            'track': track,
+                            'source': f"Genre: {genre}"
+                        })
+            except Exception as e:
+                print(f"Erreur lors de la recherche du genre {genre}: {e}")
+                continue
 
-    # Step 5: Get recommendations based on seeds (genres, artists, tracks)
-    recommendations = sp.recommendations(
-        seed_artists=[seed_artists[0]],  # Convert artist list to a comma-separated string
-        seed_tracks=[seed_tracks[0]],  # Convert track list to a comma-separated string
-        seed_genres=[seed_genres[0]],  # Convert genres list to a comma-separated string
-    )
+        # Rechercher des tracks similaires aux dernières écoutes
+        for recent_track in recent_tracks_formatted[:5]:
+            try:
+                results = sp.search(
+                    q=f"track:{recent_track['name']} artist:{recent_track['artists'][0]}", 
+                    type='track', 
+                    limit=5
+                )
+                for track in results['tracks']['items']:
+                    if track['id'] not in recent_track_ids:
+                        similar_tracks.append({
+                            'track': track,
+                            'source': f"Similaire à: {recent_track['name']}"
+                        })
+            except Exception as e:
+                print(f"Erreur lors de la recherche de similaires pour {recent_track['name']}: {e}")
+                continue
 
-    # Step 6: Print recommended tracks
-    if "tracks" in recommendations:
-        print(f"\nRecommended tracks based on your listening history:")
-        for idx, track in enumerate(recommendations["tracks"]):
-            print(f"{idx + 1} - {track['name']} by {track['artists'][0]['name']} ({track['id']})")
+        # Mélanger et sélectionner les recommandations
+        random.shuffle(similar_tracks)
+        recommendations = similar_tracks[:40]
 
-    # Return the recommendations for further use
-    return jsonify(recommendations)
+        # Formater la réponse
+        formatted_response = {
+            'tracks': [item['track'] for item in recommendations],
+            'based_on': {
+                'recent_tracks': recent_tracks_formatted[:10],
+                'top_artists': [{'name': info['name'], 'count': info['count']} for _, info in top_artists],
+                'top_genres': [{'name': genre, 'count': count} for genre, count in top_genres]
+            }
+        }
+        
+        return jsonify(formatted_response)
+        
+    except Exception as e:
+        print(f"Error generating recommendations: {e}")
+        print(traceback.format_exc())
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/get_playlist_suggestions', methods=['POST'])
 def get_playlist_suggestions():
