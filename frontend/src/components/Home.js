@@ -36,7 +36,7 @@ function Home() {
 				}
 			} catch (err) {
 				console.error(err);
-				setError('Vous devez vous connecter pour accéder à cette page.');
+				setError('You must be logged in to access this page.');
 			}
 		};
 
@@ -59,7 +59,7 @@ function Home() {
 			setPlaylists(playlistsWithImages);
 		} catch (err) {
 			console.error(err);
-			setError('Erreur lors de la récupération des playlists.');
+			setError('Error retrieving playlists.');
 		}
 	};
 
@@ -70,7 +70,7 @@ function Home() {
 			setRecommendations(response.data);
 		} catch (err) {
 			console.error(err);
-			setError(err.response?.data?.error || 'Erreur lors de la récupération des recommandations.');
+			setError(err.response?.data?.error || 'Error retrieving recommendations.');
 		} finally {
 			setLoadingRecommendations(false);
 		}
@@ -99,7 +99,7 @@ function Home() {
 			setLoading(false);
 		} catch (err) {
 			console.error(err);
-			setError(err.response?.data?.error || 'Erreur lors de la récupération des détails ou des suggestions.');
+			setError(err.response?.data?.error || 'Error retrieving details or suggestions.');
 			setLoading(false);
 		}
 	};
@@ -130,7 +130,7 @@ function Home() {
 						{loadingRecommendations ? (
 							<span>
 								<span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-								Chargement...
+								Loading...
 							</span>
 						) : 'Refresh'}
 					</button>
@@ -155,9 +155,9 @@ function Home() {
 					{loadingRecommendations ? (
 						<div className="text-center my-5">
 							<div className="spinner-border text-success" role="status">
-								<span className="visually-hidden">Chargement...</span>
+								<span className="visually-hidden">Loading...</span>
 							</div>
-							<p className="mt-2">Recherche de nouvelles recommandations...</p>
+							<p className="mt-2">Searching for new recommendations...</p>
 						</div>
 					) : (
 						<table className="table table-striped mt-3">
@@ -176,7 +176,7 @@ function Home() {
 								<tr key={track.id}>
 									<td>{index + 1}</td>
 									<td>{track.name}</td>
-									<td>{track.artists ? track.artists.map(artist => artist.name).join(', ') : 'Artiste inconnu'}</td>
+									<td>{track.artists ? track.artists.map(artist => artist.name).join(', ') : 'Unknown artist'}</td>
 									<td>
 										<div className="d-flex align-items-center">
 											{track.album?.images?.[2]?.url && (
@@ -186,17 +186,17 @@ function Home() {
 													style={{width: '40px', height: '40px', marginRight: '10px'}}
 												/>
 											)}
-											{track.album ? track.album.name : 'Album inconnu'}
+											{track.album ? track.album.name : 'Unknown album'}
 										</div>
 									</td>
 									<td>
 										{track.preview_url ? (
 											<audio controls>
 												<source src={track.preview_url} type="audio/mpeg"/>
-												Votre navigateur ne supporte pas l'élément audio.
+												Your browser does not support the audio element.
 											</audio>
 										) : (
-											'Pas de prévisualisation'
+											'No preview available'
 										)}
 									</td>
 									<Track track={track}/>
@@ -256,10 +256,10 @@ function Home() {
 									{track.preview_url ? (
 										<audio controls>
 											<source src={track.preview_url} type="audio/mpeg"/>
-											Votre navigateur ne supporte pas l'élément audio.
+											Your browser does not support the audio element.
 										</audio>
 									) : (
-										'Pas de prévisualisation'
+										'No preview available'
 									)}
 								</td>
 							</tr>
@@ -294,10 +294,10 @@ function Home() {
 									{track.preview_url ? (
 										<audio controls>
 											<source src={track.preview_url} type="audio/mpeg"/>
-											Votre navigateur ne supporte pas l'élément audio.
+											Your browser does not support the audio element.
 										</audio>
 									) : (
-										'Pas de prévisualisation'
+										'No preview available'
 									)}
 								</td>
 								<td>
