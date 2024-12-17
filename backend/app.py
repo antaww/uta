@@ -510,6 +510,7 @@ def get_custom_recommendations():
         seed_artists = data.get('artists', [])[:5]
         seed_tracks = data.get('tracks', [])[:5]
         seed_genres = data.get('genres', [])[:3]
+        # todo: fix not working when no artist selected
         
         # Vérifier qu'au moins un seed est fourni
         if not (seed_artists or seed_tracks or seed_genres):
