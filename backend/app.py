@@ -57,11 +57,11 @@ def login():
 def like():
     sp = get_spotify_client()
     if not sp:
-        return jsonify({'error': 'Utilisateur non authentifié'}), 401
+        return jsonify({'error': 'User not authenticated'}), 401
 
     track_id = request.json['track_id']
     if not track_id:
-        return jsonify({'error': 'track_id manquant'}), 400
+        return jsonify({'error': 'Missing track_id'}), 400
 
     try:
         sp.current_user_saved_tracks_add([track_id])
@@ -75,11 +75,11 @@ def like():
 def unlike():
     sp = get_spotify_client()
     if not sp:
-        return jsonify({'error': 'Utilisateur non authentifié'}), 401
+        return jsonify({'error': 'User not authenticated'}), 401
 
     track_id = request.json['track_id']
     if not track_id:
-        return jsonify({'error': 'track_id manquant'}), 400
+        return jsonify({'error': 'Missing track_id'}), 400
 
     try:
         sp.current_user_saved_tracks_delete([track_id])
@@ -139,7 +139,7 @@ def current_user():
 def get_playlists():
     sp = get_spotify_client()
     if not sp:
-        return jsonify({'error': 'Utilisateur non authentifié'}), 401
+        return jsonify({'error': 'User not authenticated'}), 401
 
     try:
         playlists = []
@@ -167,11 +167,11 @@ def get_playlists():
 def get_playlist_image():
     sp = get_spotify_client()
     if not sp:
-        return jsonify({'error': 'Utilisateur non authentifié'}), 401
+        return jsonify({'error': 'User not authenticated'}), 401
 
     playlist_id = request.args.get('playlist_id')
     if not playlist_id:
-        return jsonify({'error': 'playlist_id manquant'}), 400
+        return jsonify({'error': 'Missing playlist_id'}), 400
 
     try:
         image = sp.playlist_cover_image(playlist_id)
@@ -188,11 +188,11 @@ def get_playlist_image():
 def get_playlist_details():
     sp = get_spotify_client()
     if not sp:
-        return jsonify({'error': 'Utilisateur non authentifié'}), 401
+        return jsonify({'error': 'User not authenticated'}), 401
 
     playlist_id = request.args.get('playlist_id')
     if not playlist_id:
-        return jsonify({'error': 'playlist_id manquant'}), 400
+        return jsonify({'error': 'Missing playlist_id'}), 400
 
     try:
         playlist = sp.playlist(playlist_id)
@@ -233,7 +233,7 @@ def get_playlist_details():
 def get_recommendations():
     sp = get_spotify_client()
     if not sp:
-        return jsonify({'error': 'Utilisateur non authentifié'}), 401
+        return jsonify({'error': 'User not authenticated'}), 401
 
     try:
         # 1. Récupérer l'historique d'écoute récent et les top artistes
@@ -352,7 +352,7 @@ def get_recommendations():
 def get_playlist_suggestions():
     sp = get_spotify_client()
     if not sp:
-        return jsonify({'error': 'Utilisateur non authentifié'}), 401
+        return jsonify({'error': 'User not authenticated'}), 401
 
     try:
         playlist_id = request.json['playlist_id']

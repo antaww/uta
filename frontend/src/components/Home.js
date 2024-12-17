@@ -107,7 +107,7 @@ function Home() {
 	if (!user) {
 		return (
 			<div className="container text-center my-5">
-				<h2>Chargement...</h2>
+				<h2>Loading...</h2>
 			</div>
 		);
 	}
@@ -116,11 +116,11 @@ function Home() {
 		<div className="container my-5">
 			<div class="d-flex align-items-center gap-3">
 				<img src={user.images[0].url} alt={user.display_name} className="profile-icon"/>
-				<h2 class="fat-text">Bienvenue, {user.display_name}!</h2>
+				<h2 class="fat-text">Welcome, {user.display_name}!</h2>
 			</div>
 			<hr/>
 			<div class="gap-4 d-flex justify-content-between align-items-center">
-				<h4 className="m-0 fat-text">Découverte</h4> 
+				<h4 className="m-0 fat-text">Discovery</h4> 
 				{recommendations.tracks.length > 0 ? (
 					<button 
 						className="btn btn-secondary m-0 fat-text transparent-btn" 
@@ -146,9 +146,9 @@ function Home() {
 					{loadingRecommendations ? (
 						<span>
 							<span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-							Recherche de musiques...
+							Searching for music...
 						</span>
-					) : 'Découvrir de la musique'}
+					) : 'Discover Music'}
 				</button>
 			) : (
 				<div className="mt-3">
@@ -164,10 +164,10 @@ function Home() {
 							<thead className="table-dark">
 							<tr>
 								<th>#</th>
-								<th>Nom</th>
-								<th>Artiste</th>
+								<th>Name</th>
+								<th>Artist</th>
 								<th>Album</th>
-								<th>Écouter</th>
+								<th>Listen</th>
 								<th>Spotify</th>
 							</tr>
 							</thead>
@@ -197,9 +197,9 @@ function Home() {
 				</div>
 			)}
 			<hr/>
-			<h4 className="fat-text">Vos Playlists</h4>
+			<h4 className="fat-text">Your Playlists</h4>
 			{playlists.length === 0 ? (
-				<p>Vous n'avez aucune playlist.</p>
+				<p>You don't have any playlists.</p>
 			) : (
 				<div className="list-group">
 					{playlists.map((playlist) => (
@@ -218,7 +218,7 @@ function Home() {
 
 			{error && <div className="alert alert-danger mt-4">{error}</div>}
 
-			{loading && <p className="mt-4">Chargement des détails et des suggestions...</p>}
+			{loading && <p className="mt-4">Loading details and suggestions...</p>}
 
 			{playlistDetails && (
 				<div className="">
@@ -228,10 +228,10 @@ function Home() {
 						<thead className="table-dark">
 						<tr>
 							<th>#</th>
-							<th>Nom</th>
-							<th>Artiste</th>
+							<th>Name</th>
+							<th>Artist</th>
 							<th>Album</th>
-							<th>Écouter</th>
+							<th>Listen</th>
 						</tr>
 						</thead>
 						<tbody>
@@ -260,15 +260,15 @@ function Home() {
 
 			{suggestedTracks.length > 0 && (
 				<div className="mt-5">
-					<h3>Suggestions de Musiques</h3>
+					<h3>Music Suggestions</h3>
 					<table className="table table-striped mt-3">
 						<thead className="table-dark">
 						<tr>
 							<th>#</th>
-							<th>Nom</th>
-							<th>Artiste</th>
+							<th>Name</th>
+							<th>Artist</th>
 							<th>Album</th>
-							<th>Écouter</th>
+							<th>Listen</th>
 							<th>Spotify</th>
 						</tr>
 						</thead>
@@ -304,15 +304,15 @@ function Home() {
 
 			{recommendations.tracks.length > 0 && (
 				<div className="mt-4">
-					<h4 className="fat-text">Recommandations basées sur vos écoutes récentes</h4>
+					<h4 className="fat-text">Recommendations based on your recent listens</h4>
 					
 					{/* Top Artists */}
 					<div className="mb-3">
-						<h5>Artistes les plus écoutés :</h5>
+						<h5>Most listened artists:</h5>
 						<ul className="list-unstyled">
 							{recommendations.based_on?.top_artists.map((artist, index) => (
 								<li key={index} className="mb-1">
-									{artist.name} ({artist.count} écoutes)
+									{artist.name} ({artist.count} plays)
 								</li>
 							))}
 						</ul>
@@ -320,11 +320,11 @@ function Home() {
 
 					{/* Top Genres */}
 					<div className="mb-3">
-						<h5>Genres les plus écoutés :</h5>
+						<h5>Most listened genres:</h5>
 						<ul className="list-unstyled">
 							{recommendations.based_on?.top_genres.map((genre, index) => (
 								<li key={index} className="mb-1">
-									{genre.name} ({genre.count} écoutes)
+									{genre.name} ({genre.count} plays)
 								</li>
 							))}
 						</ul>
@@ -332,12 +332,12 @@ function Home() {
 
 					{/* Recent Tracks */}
 					<div className="mb-3">
-						<h5>Dernières écoutes :</h5>
+						<h5>Recent listens:</h5>
 						<table className="table table-sm">
 							<thead>
 								<tr>
-									<th>Titre</th>
-									<th>Artiste(s)</th>
+									<th>Title</th>
+									<th>Artist(s)</th>
 									<th>Album</th>
 								</tr>
 							</thead>

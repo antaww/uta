@@ -25,11 +25,11 @@ function Navbar() {
           <ul className="navbar-nav ms-auto">
             {user ? (
               <li className="nav-item">
-                <button className="btn btn-danger red-btn" onClick={handleLogout}>Se Déconnecter</button>
+                <button className="btn btn-danger red-btn" onClick={handleLogout}>Logout</button>
               </li>
             ) : (
               <li className="nav-item">
-                <button className="btn btn-success me-2 green-btn" onClick={handleLogin}>Se Connecter</button>
+                <button className="btn btn-success me-2 green-btn" onClick={handleLogin}>Login</button>
               </li>
             )}
           </ul>
