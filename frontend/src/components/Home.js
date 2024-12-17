@@ -3,6 +3,9 @@ import React, {useContext, useEffect, useState} from 'react';
 import axios from 'axios';
 import Track from "./Like";
 import {UserContext} from '../context/UserContext';
+import CustomRecommendations from './CustomRecommendations';
+import InfoModal from './InfoModal';
+import RecommendationSection from './RecommendationSection';
 
 function Home() {
 	const {
@@ -13,7 +16,7 @@ function Home() {
 	const [selectedPlaylist, setSelectedPlaylist] = useState('');
 	const [playlistDetails, setPlaylistDetails] = useState(null);
 	const [suggestedTracks, setSuggestedTracks] = useState([]);
-	const [recommendations, setRecommendations] = useState({
+	const [historyRecommendations, setHistoryRecommendations] = useState({
 		tracks: [],
 		based_on: {
 			recent_tracks: [],
@@ -21,9 +24,19 @@ function Home() {
 			top_genres: []
 		}
 	});
+	const [customRecommendations, setCustomRecommendations] = useState({
+		tracks: [],
+		based_on: {
+			selected_artists: [],
+			selected_tracks: [],
+			selected_genres: []
+		}
+	});
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
 	const [loadingRecommendations, setLoadingRecommendations] = useState(false);
+	const [showHistoryModal, setShowHistoryModal] = useState(false);
+	const [showCustomModal, setShowCustomModal] = useState(false);
 
 	useEffect(() => {
 		// Vérifier si l'utilisateur est authentifié
@@ -63,17 +76,21 @@ function Home() {
 		}
 	};
 
-	const fetchRecommendations = async () => {
+	const fetchHistoryRecommendations = async () => {
 		setLoadingRecommendations(true);
 		try {
 			const response = await axios.get('/get_recommendations', {withCredentials: true});
-			setRecommendations(response.data);
+			setHistoryRecommendations(response.data);
 		} catch (err) {
 			console.error(err);
 			setError(err.response?.data?.error || 'Error retrieving recommendations.');
 		} finally {
 			setLoadingRecommendations(false);
 		}
+	};
+
+	const handleCustomRecommendations = (customRecommendations) => {
+		setCustomRecommendations(customRecommendations);
 	};
 
 	const handlePlaylistSelect = async (playlist_id) => {
@@ -119,94 +136,26 @@ function Home() {
 				<h2 class="fat-text">Welcome, {user.display_name}!</h2>
 			</div>
 			<hr/>
-			<div class="gap-4 d-flex justify-content-between align-items-center">
-				<h4 className="m-0 fat-text">Discovery</h4> 
-				{recommendations.tracks.length > 0 ? (
-					<button 
-						className="btn btn-secondary m-0 fat-text transparent-btn" 
-						onClick={fetchRecommendations}
-						disabled={loadingRecommendations}
-					>
-						{loadingRecommendations ? (
-							<span>
-								<span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-								Loading...
-							</span>
-						) : 'Refresh'}
-					</button>
-				) : null}
-			</div>
 
-			{recommendations.tracks.length === 0 ? (
-				<button 
-					className="btn btn-primary mt-3 green-btn" 
-					onClick={fetchRecommendations}
-					disabled={loadingRecommendations}
-				>
-					{loadingRecommendations ? (
-						<span>
-							<span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-							Searching for music...
-						</span>
-					) : 'Discover Music'}
-				</button>
-			) : (
-				<div className="mt-3">
-					{loadingRecommendations ? (
-						<div className="text-center my-5">
-							<div className="spinner-border text-success" role="status">
-								<span className="visually-hidden">Loading...</span>
-							</div>
-							<p className="mt-2">Searching for new recommendations...</p>
-						</div>
-					) : (
-						<table className="table table-striped mt-3">
-							<thead className="table-dark">
-							<tr>
-								<th>#</th>
-								<th>Name</th>
-								<th>Artist</th>
-								<th>Album</th>
-								<th>Listen</th>
-								<th>Spotify</th>
-							</tr>
-							</thead>
-							<tbody>
-							{recommendations.tracks.map((track, index) => (
-								<tr key={track.id}>
-									<td>{index + 1}</td>
-									<td>{track.name}</td>
-									<td>{track.artists ? track.artists.map(artist => artist.name).join(', ') : 'Unknown artist'}</td>
-									<td>
-										<div className="d-flex align-items-center">
-											{track.album?.images?.[2]?.url && (
-												<img 
-													src={track.album.images[2].url} 
-													alt={track.album.name} 
-													style={{width: '40px', height: '40px', marginRight: '10px'}}
-												/>
-											)}
-											{track.album ? track.album.name : 'Unknown album'}
-										</div>
-									</td>
-									<td>
-										{track.preview_url ? (
-											<audio controls>
-												<source src={track.preview_url} type="audio/mpeg"/>
-												Your browser does not support the audio element.
-											</audio>
-										) : (
-											'No preview available'
-										)}
-									</td>
-									<Track track={track}/>
-								</tr>
-							))}
-							</tbody>
-						</table>
-					)}
-				</div>
-			)}
+			<RecommendationSection 
+				title="Recommendations based on your History"
+				recommendations={historyRecommendations}
+				onRefresh={fetchHistoryRecommendations}
+				loading={loadingRecommendations}
+				onShowDetails={() => setShowHistoryModal(true)}
+			/>
+
+			<RecommendationSection 
+				title="Recommendations based on your Choices"
+				recommendations={customRecommendations}
+				loading={loadingRecommendations}
+				showRefreshButton={false}
+				onShowDetails={() => setShowCustomModal(true)}
+				customContent={
+					<CustomRecommendations onGetRecommendations={handleCustomRecommendations} />
+				}
+			/>
+
 			<hr/>
 			<h4 className="fat-text">Your Playlists</h4>
 			{playlists.length === 0 ? (
@@ -313,58 +262,99 @@ function Home() {
 				</div>
 			)}
 
-			{recommendations.tracks.length > 0 && (
-				<div className="mt-4">
-					<h4 className="fat-text">Recommendations based on your recent listens</h4>
-					
-					{/* Top Artists */}
-					<div className="mb-3">
-						<h5>Most listened artists:</h5>
-						<ul className="list-unstyled">
-							{recommendations.based_on?.top_artists.map((artist, index) => (
-								<li key={index} className="mb-1">
+			<InfoModal 
+				show={showHistoryModal} 
+				onClose={() => setShowHistoryModal(false)}
+				title="Based on your History"
+			>
+				{historyRecommendations.based_on.recent_tracks?.length > 0 && (
+					<div className="info-section">
+						<h6>Recent listens:</h6>
+						<ul className="info-list">
+							{historyRecommendations.based_on.recent_tracks.map((track, index) => (
+								<li key={index}>
+									<strong>{track.name}</strong>
+									<br />
+									<small>by {track.artists.join(', ')} • {track.album}</small>
+								</li>
+							))}
+						</ul>
+					</div>
+				)}
+				{historyRecommendations.based_on.top_artists?.length > 0 && (
+					<div className="info-section">
+						<h6>Most listened artists:</h6>
+						<ul className="info-list">
+							{historyRecommendations.based_on.top_artists.map((artist, index) => (
+								<li key={index}>
 									{artist.name} ({artist.count} plays)
 								</li>
 							))}
 						</ul>
 					</div>
-
-					{/* Top Genres */}
-					<div className="mb-3">
-						<h5>Most listened genres:</h5>
-						<ul className="list-unstyled">
-							{recommendations.based_on?.top_genres.map((genre, index) => (
-								<li key={index} className="mb-1">
+				)}
+				{historyRecommendations.based_on.top_genres?.length > 0 && (
+					<div className="info-section">
+						<h6>Most listened genres:</h6>
+						<ul className="info-list">
+							{historyRecommendations.based_on.top_genres.map((genre, index) => (
+								<li key={index}>
 									{genre.name} ({genre.count} plays)
 								</li>
 							))}
 						</ul>
 					</div>
+				)}
+			</InfoModal>
 
-					{/* Recent Tracks */}
-					<div className="mb-3">
-						<h5>Recent listens:</h5>
-						<table className="table table-sm">
-							<thead>
-								<tr>
-									<th>Title</th>
-									<th>Artist(s)</th>
-									<th>Album</th>
-								</tr>
-							</thead>
-							<tbody>
-								{recommendations.based_on?.recent_tracks.map((track, index) => (
-									<tr key={index}>
-										<td>{track.name}</td>
-										<td>{track.artists.join(', ')}</td>
-										<td>{track.album}</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
+			<InfoModal 
+				show={showCustomModal} 
+				onClose={() => setShowCustomModal(false)}
+				title="Based on your Selections"
+			>
+				{customRecommendations.based_on.selected_tracks?.length > 0 && (
+					<div className="info-section">
+						<h6>Selected tracks:</h6>
+						<ul className="info-list">
+							{customRecommendations.based_on.selected_tracks.map((trackId, index) => {
+								const track = customRecommendations.tracks.find(t => t.id === trackId);
+								return (
+									<li key={index}>
+										{track ? `${track.name} by ${track.artists.map(a => a.name).join(', ')}` : trackId}
+									</li>
+								);
+							})}
+						</ul>
 					</div>
-				</div>
-			)}
+				)}
+				{customRecommendations.based_on.selected_artists?.length > 0 && (
+					<div className="info-section">
+						<h6>Selected artists:</h6>
+						<ul className="info-list">
+							{customRecommendations.based_on.selected_artists.map((artistId, index) => {
+								const artist = customRecommendations.tracks.find(t => 
+									t.artists.some(a => a.id === artistId)
+								)?.artists.find(a => a.id === artistId);
+								return (
+									<li key={index}>
+										{artist ? artist.name : artistId}
+									</li>
+								);
+							})}
+						</ul>
+					</div>
+				)}
+				{customRecommendations.based_on.selected_genres?.length > 0 && (
+					<div className="info-section">
+						<h6>Selected genres:</h6>
+						<ul className="info-list">
+							{customRecommendations.based_on.selected_genres.map((genre, index) => (
+								<li key={index}>{genre}</li>
+							))}
+						</ul>
+					</div>
+				)}
+			</InfoModal>
 		</div>
 	);
 }

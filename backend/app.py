@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 from urllib.parse import urlparse
 import traceback
 import random
+from spotipy.exceptions import SpotifyException
 
 load_dotenv()
 
@@ -411,6 +412,184 @@ def get_playlist_suggestions():
         print(traceback.format_exc())
         return jsonify({'error': str(e)}), 500
 
+@app.route('/search_artists', methods=['GET'])
+def search_artists():
+    sp = get_spotify_client()
+    if not sp:
+        return jsonify({'error': 'User not authenticated'}), 401
+
+    query = request.args.get('query')
+    if not query or len(query.strip()) == 0:
+        return jsonify({'error': 'Query empty'}), 400
+
+    try:
+        results = sp.search(q=query, type='artist', limit=10)
+        artists = [{
+            'id': artist['id'],
+            'name': artist['name'],
+            'image': artist['images'][0]['url'] if artist['images'] else None
+        } for artist in results['artists']['items']]
+        return jsonify({'artists': artists})
+    except SpotifyException as e:
+        if e.http_status == 429:  # Too Many Requests
+            retry_after = e.headers.get('Retry-After', 30)
+            return jsonify({
+                'error': 'Rate limit exceeded',
+                'retry_after': retry_after
+            }), 429
+        print(f"Error searching artists: {e}")
+        return jsonify({'error': str(e)}), e.http_status
+
+@app.route('/search_tracks', methods=['GET'])
+def search_tracks():
+    sp = get_spotify_client()
+    if not sp:
+        return jsonify({'error': 'User not authenticated'}), 401
+
+    query = request.args.get('query')
+    if not query or len(query.strip()) == 0:
+        return jsonify({'error': 'Query empty'}), 400
+
+    try:
+        results = sp.search(q=query, type='track', limit=10)
+        tracks = [{
+            'id': track['id'],
+            'name': track['name'],
+            'artists': [artist['name'] for artist in track['artists']],
+            'album': track['album']['name'],
+            'image': track['album']['images'][0]['url'] if track['album']['images'] else None
+        } for track in results['tracks']['items']]
+        return jsonify({'tracks': tracks})
+    except Exception as e:
+        print(f"Error searching tracks: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/get_genres', methods=['GET'])
+def get_genres():
+    sp = get_spotify_client()
+    if not sp:
+        return jsonify({'error': 'User not authenticated'}), 401
+
+    try:
+        genres = [
+            "acoustic", "afrobeat", "alt-rock", "alternative", "ambient", "anime", "black-metal",
+            "bluegrass", "blues", "bossanova", "brazil", "breakbeat", "british",
+            "cantopop", "chicago-house", "children", "chill", "classical", "club",
+            "comedy", "country", "dance", "dancehall", "death-metal", "deep-house",
+            "detroit-techno", "disco", "disney", "drum-and-bass", "dub", "dubstep",
+            "edm", "electro", "electronic", "emo", "folk", "forro", "french",
+            "funk", "garage", "german", "gospel", "goth", "grindcore", "groove",
+            "grunge", "guitar", "happy", "hard-rock", "hardcore", "hardstyle",
+            "heavy-metal", "hip-hop", "holidays", "honky-tonk", "house", "idm",
+            "indian", "indie", "indie-pop", "industrial", "iranian", "j-dance",
+            "j-idol", "j-pop", "j-rock", "jazz", "k-pop", "kids", "latin",
+            "latino", "malay", "mandopop", "metal", "metal-misc", "metalcore",
+            "minimal-techno", "movies", "mpb", "new-age", "new-release", "opera",
+            "pagode", "party", "philippines-opm", "piano", "pop", "pop-film",
+            "post-dubstep", "power-pop", "progressive-house", "psych-rock",
+            "punk", "punk-rock", "r-n-b", "rainy-day", "reggae", "reggaeton",
+            "road-trip", "rock", "rock-n-roll", "rockabilly", "romance", "sad",
+            "salsa", "samba", "sertanejo", "show-tunes", "singer-songwriter",
+            "ska", "sleep", "songwriter", "soul", "soundtracks", "spanish",
+            "study", "summer", "swedish", "synth-pop", "tango", "techno",
+            "trance", "trip-hop", "turkish", "work-out", "world-music"
+        ]
+        return jsonify({'genres': sorted(genres)})  # Trier par ordre alphabétique
+    except Exception as e:
+        print(f"Error fetching genres: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/get_custom_recommendations', methods=['POST'])
+def get_custom_recommendations():
+    sp = get_spotify_client()
+    if not sp:
+        return jsonify({'error': 'User not authenticated'}), 401
+
+    try:
+        data = request.json
+        seed_artists = data.get('artists', [])[:5]
+        seed_tracks = data.get('tracks', [])[:5]
+        seed_genres = data.get('genres', [])[:3]
+        
+        # Vérifier qu'au moins un seed est fourni
+        if not (seed_artists or seed_tracks or seed_genres):
+            return jsonify({'error': 'At least one seed (artist, track, or genre) is required'}), 400
+
+        # Récupérer le pays de l'utilisateur
+        user_info = sp.current_user()
+        market = user_info['country']
+
+        similar_tracks = []
+        
+        # Obtenir des recommandations basées sur les artistes sélectionnés
+        if seed_artists:
+            try:
+                for artist_id in seed_artists:
+                    top_tracks = sp.artist_top_tracks(artist_id, country=market)['tracks']
+                    for track in top_tracks[:10]:
+                        similar_tracks.append({
+                            'track': track,
+                            'source': f"Top tracks de l'artiste sélectionné"
+                        })
+            except Exception as e:
+                print(f"Erreur lors de la récupération des tracks pour les artistes: {e}")
+
+        # Obtenir des recommandations basées sur les morceaux sélectionnés
+        if seed_tracks:
+            try:
+                # Faire une seule requête avec tous les seed_tracks
+                results = sp.recommendations(
+                    seed_tracks=seed_tracks,
+                    limit=min(10 * len(seed_tracks), 20),  # Limiter le nombre total
+                    market=market,
+                    min_popularity=30
+                )
+                for track in results['tracks']:
+                    similar_tracks.append({
+                        'track': track,
+                        'source': f"Similaire aux morceaux sélectionnés"
+                    })
+            except Exception as e:
+                print(f"Erreur lors de la recherche de similaires pour les tracks: {e}")
+
+        # Obtenir des recommandations basées sur les genres
+        if seed_genres:
+            try:
+                # Utiliser tous les genres sélectionnés en une seule requête
+                results = sp.recommendations(
+                    seed_genres=seed_genres,
+                    limit=min(10 * len(seed_genres), 20),  # Limiter le nombre total
+                    market=market,
+                    min_popularity=30
+                )
+                for track in results['tracks']:
+                    similar_tracks.append({
+                        'track': track,
+                        'source': f"Basé sur les genres sélectionnés"
+                    })
+            except Exception as e:
+                print(f"Erreur lors de la recherche par genres: {e}")
+
+        if not similar_tracks:
+            return jsonify({'error': 'Could not generate recommendations with the given seeds'}), 400
+
+        # Mélanger et formater la réponse
+        random.shuffle(similar_tracks)
+        formatted_response = {
+            'tracks': [item['track'] for item in similar_tracks[:80]],  # Limiter à 80 pistes
+            'based_on': {
+                'selected_artists': seed_artists,
+                'selected_tracks': seed_tracks,
+                'selected_genres': seed_genres
+            }
+        }
+
+        return jsonify(formatted_response)
+
+    except Exception as e:
+        print(f"Error generating custom recommendations: {e}")
+        print(traceback.format_exc())
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
