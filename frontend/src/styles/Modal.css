@@ -11,8 +11,8 @@
     z-index: 1050;
 }
 
-.modal-content {
-    background: #111;
+.modal-content {    
+    background: #111 !important;
     border-radius: .3rem;
     padding: 2rem;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);

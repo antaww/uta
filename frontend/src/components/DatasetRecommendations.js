@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import InfoModal from './InfoModal';
+import SongComparisonChart from './SongComparisonChart';
 
 const DatasetRecommendations = () => {
     const [selectedSongs, setSelectedSongs] = useState([]);
@@ -10,6 +11,7 @@ const DatasetRecommendations = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
+    const [selectedComparisonSong, setSelectedComparisonSong] = useState(null);
     const [recommendationDetails, setRecommendationDetails] = useState({
         recommendations: [],
         based_on: {
@@ -74,6 +76,10 @@ const DatasetRecommendations = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleComparisonSongSelect = (song) => {
+        setSelectedComparisonSong(song);
     };
 
     return (
@@ -222,6 +228,36 @@ const DatasetRecommendations = () => {
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                )}
+
+                {recommendations.length > 0 && (
+                    <div className="info-section">
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                            <h6 className="mb-0">Features Comparison:</h6>
+                            <select 
+                                className="form-select form-select-sm" 
+                                style={{ width: 'auto', background: '#333', color: 'white', border: '1px solid #666' }}
+                                value={selectedComparisonSong ? selectedComparisonSong.name : ''}
+                                onChange={(e) => {
+                                    const song = recommendations.find(s => s.name === e.target.value);
+                                    setSelectedComparisonSong(song);
+                                }}
+                            >
+                                <option value="">Select a song to compare</option>
+                                {recommendations.map((song, index) => (
+                                    <option key={index} value={song.name}>
+                                        {song.name} - {Array.isArray(song.artists) ? song.artists.join(', ') : song.artists}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        {selectedComparisonSong && recommendationDetails.based_on.input_songs?.[0] && (
+                            <SongComparisonChart 
+                                inputSong={recommendationDetails.based_on.input_songs[0]}
+                                comparedSong={selectedComparisonSong}
+                            />
+                        )}
                     </div>
                 )}
 
