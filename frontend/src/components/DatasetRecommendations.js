@@ -236,8 +236,7 @@ const DatasetRecommendations = () => {
                         <div className="d-flex justify-content-between align-items-center mb-3">
                             <h6 className="mb-0">Features Comparison:</h6>
                             <select 
-                                className="form-select form-select-sm" 
-                                style={{ width: 'auto', background: '#333', color: 'white', border: '1px solid #666' }}
+                                className="form-select form-select-sm form-select-dark" 
                                 value={selectedComparisonSong ? selectedComparisonSong.name : ''}
                                 onChange={(e) => {
                                     const song = recommendations.find(s => s.name === e.target.value);
