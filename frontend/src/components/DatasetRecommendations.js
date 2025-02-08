@@ -11,7 +11,7 @@ const DatasetRecommendations = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
-    const [selectedComparisonSong, setSelectedComparisonSong] = useState(null);
+    const [selectedComparisonSong, setSelectedComparisonSong] = useState([]);
     const [recommendationDetails, setRecommendationDetails] = useState({
         recommendations: [],
         based_on: {
@@ -235,28 +235,41 @@ const DatasetRecommendations = () => {
                     <div className="info-section">
                         <div className="d-flex justify-content-between align-items-center mb-3">
                             <h6 className="mb-0">Features Comparison:</h6>
-                            <select 
-                                className="form-select form-select-sm form-select-dark" 
-                                value={selectedComparisonSong ? selectedComparisonSong.name : ''}
-                                onChange={(e) => {
-                                    const song = recommendations.find(s => s.name === e.target.value);
-                                    setSelectedComparisonSong(song);
-                                }}
-                            >
-                                <option value="">Select a song to compare</option>
-                                {recommendations.map((song, index) => (
-                                    <option key={index} value={song.name}>
-                                        {song.name} - {Array.isArray(song.artists) ? song.artists.join(', ') : song.artists}
-                                    </option>
-                                ))}
-                            </select>
                         </div>
-                        {selectedComparisonSong && recommendationDetails.based_on.input_songs?.[0] && (
-                            <SongComparisonChart 
-                                inputSong={recommendationDetails.based_on.input_songs[0]}
-                                comparedSong={selectedComparisonSong}
-                            />
-                        )}
+                        <div className="comparison-container">
+                            <div className="comparison-options">
+                                {recommendations.map((song, index) => (
+                                    <div key={index} className="form-check">
+                                        <input
+                                            type="checkbox"
+                                            className="form-check-input"
+                                            id={`compare-song-${index}`}
+                                            checked={selectedComparisonSong.some(s => s.name === song.name)}
+                                            onChange={(e) => {
+                                                if (e.target.checked) {
+                                                    setSelectedComparisonSong(prev => [...prev, song]);
+                                                } else {
+                                                    setSelectedComparisonSong(prev => 
+                                                        prev.filter(s => s.name !== song.name)
+                                                    );
+                                                }
+                                            }}
+                                        />
+                                        <label className="form-check-label" htmlFor={`compare-song-${index}`}>
+                                            {song.name} - {Array.isArray(song.artists) ? song.artists.join(', ') : song.artists}
+                                        </label>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="comparison-chart">
+                                {recommendationDetails.based_on.input_songs?.[0] && (
+                                    <SongComparisonChart 
+                                        inputSong={recommendationDetails.based_on.input_songs[0]}
+                                        comparedSongs={selectedComparisonSong}
+                                    />
+                                )}
+                            </div>
+                        </div>
                     </div>
                 )}
 

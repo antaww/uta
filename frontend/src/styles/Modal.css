@@ -146,4 +146,43 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.comparison-container {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+.comparison-options {
+    flex: 0 0 300px;
+}
+
+.comparison-chart {
+    flex: 1;
+    min-width: 0;
+}
+
+.form-check {
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.form-check:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.form-check-input {
+    margin-top: 0.3rem;
+}
+
+.form-check-label {
+    margin-left: 0.5rem;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    max-width: calc(100% - 2rem);
 } 

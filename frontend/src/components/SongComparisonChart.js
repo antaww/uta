@@ -19,7 +19,15 @@ ChartJS.register(
     Legend
 );
 
-const SongComparisonChart = ({ inputSong, comparedSong }) => {
+const colors = [
+    { border: 'rgb(54, 162, 235)', background: 'rgba(54, 162, 235, 0.2)' },
+    { border: 'rgb(255, 99, 132)', background: 'rgba(255, 99, 132, 0.2)' },
+    { border: 'rgb(75, 192, 192)', background: 'rgba(75, 192, 192, 0.2)' },
+    { border: 'rgb(255, 159, 64)', background: 'rgba(255, 159, 64, 0.2)' },
+    { border: 'rgb(153, 102, 255)', background: 'rgba(153, 102, 255, 0.2)' }
+];
+
+const SongComparisonChart = ({ inputSong, comparedSongs }) => {
     const features = [
         'valence',
         'energy',
@@ -35,25 +43,25 @@ const SongComparisonChart = ({ inputSong, comparedSong }) => {
             {
                 label: 'Input Song',
                 data: features.map(feature => inputSong[feature]),
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgb(54, 162, 235)',
+                backgroundColor: colors[0].background,
+                borderColor: colors[0].border,
                 borderWidth: 2,
-                pointBackgroundColor: 'rgb(54, 162, 235)',
+                pointBackgroundColor: colors[0].border,
                 pointBorderColor: '#fff',
                 pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgb(54, 162, 235)'
+                pointHoverBorderColor: colors[0].border
             },
-            {
-                label: 'Recommended Song',
-                data: features.map(feature => comparedSong[feature]),
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgb(255, 99, 132)',
+            ...comparedSongs.map((song, index) => ({
+                label: song.name,
+                data: features.map(feature => song[feature]),
+                backgroundColor: colors[(index + 1) % colors.length].background,
+                borderColor: colors[(index + 1) % colors.length].border,
                 borderWidth: 2,
-                pointBackgroundColor: 'rgb(255, 99, 132)',
+                pointBackgroundColor: colors[(index + 1) % colors.length].border,
                 pointBorderColor: '#fff',
                 pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgb(255, 99, 132)'
-            }
+                pointHoverBorderColor: colors[(index + 1) % colors.length].border
+            }))
         ]
     };
 
@@ -78,14 +86,17 @@ const SongComparisonChart = ({ inputSong, comparedSong }) => {
         plugins: {
             legend: {
                 labels: {
-                    color: 'white'
-                }
+                    color: 'white',
+                    boxWidth: 20,
+                    padding: 10
+                },
+                position: 'right'
             }
         }
     };
 
     return (
-        <div style={{ maxWidth: '500px', margin: '0 auto' }}>
+        <div style={{ width: '100%', height: '100%', minHeight: '400px' }}>
             <Radar data={data} options={options} />
         </div>
     );
