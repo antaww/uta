@@ -7,6 +7,7 @@
     --spotify-green-hover: #21ed6a;
     --btn-red: #f82938;
     --btn-red-hover: #fd3645;
+    --card-bg: #282828;
 }
 
 .App {
@@ -30,6 +31,16 @@ body, .container, .navbar {
 
 .navbar-brand {
     color: var(--white-1) !important;
+}
+
+.nav-link {
+    color: var(--white-1) !important;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.nav-link:hover {
+    opacity: 1;
 }
 
 .green-btn {
@@ -73,8 +84,7 @@ body, .container, .navbar {
 }
 
 .fat-text {
-    font-weight: 800 !important;
-    text-transform: uppercase !important;
+    font-weight: 700 !important;
 }
 
 table, th, td {
@@ -83,11 +93,10 @@ table, th, td {
 }
 
 .profile-icon {
-    border: 4px solid var(--white-1);
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
-    height: 6rem;
     object-fit: cover;
-    width: 6rem;
 }
 
 tr:last-child {
@@ -110,9 +119,10 @@ tr:last-child {
 }
 
 .playlist-icon {
-    height: 3rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
     object-fit: cover;
-    width: 3rem;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -143,4 +153,126 @@ tr:last-child {
     to {
         transform: rotate(360deg);
     }
+}
+
+/* Styles pour les cartes de la page d'accueil */
+.card {
+    background-color: var(--card-bg) !important;
+    border: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+.card-title {
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.card-text {
+    color: var(--white-2);
+    margin-bottom: 1.5rem;
+    min-height: 3rem;
+}
+
+/* Styles pour les tableaux */
+.table {
+    color: var(--white-1) !important;
+}
+
+.table-dark {
+    background-color: var(--card-bg) !important;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.table-striped tbody tr:nth-of-type(even) {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+/* Styles pour les modales */
+.modal-content {
+    background-color: var(--card-bg) !important;
+    color: var(--white-1) !important;
+}
+
+.modal-header {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.modal-footer {
+    border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Styles pour les listes */
+.list-group-item {
+    background-color: var(--card-bg) !important;
+    color: var(--white-1) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.list-group-item:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.list-group-item.active {
+    background-color: var(--spotify-green) !important;
+    border-color: var(--spotify-green) !important;
+}
+
+/* Styles pour les formulaires */
+.form-control, .form-select {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: var(--white-1) !important;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    border-color: var(--spotify-green) !important;
+    box-shadow: 0 0 0 0.25rem rgba(30, 215, 96, 0.25) !important;
+}
+
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Styles pour les info-sections */
+.info-section {
+    margin-bottom: 1.5rem;
+}
+
+.info-section h6 {
+    color: var(--spotify-green);
+    margin-bottom: 0.5rem;
+}
+
+.info-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.info-list li {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+/* Styles pour les boutons de navigation */
+.navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.7%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
 }
