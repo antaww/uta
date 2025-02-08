@@ -88,11 +88,35 @@ const SongComparisonChart = ({ inputSong, comparedSongs }) => {
                 labels: {
                     color: 'white',
                     boxWidth: 20,
-                    padding: 10
+                    padding: 10,
+                    textOverflow: 'ellipsis',
+                    maxWidth: 200,
+                    generateLabels: (chart) => {
+                        const datasets = chart.data.datasets;
+                        return datasets.map((dataset, i) => {
+                            const text = dataset.label || '';
+                            // Tronquer le texte s'il dépasse 30 caractères
+                            const truncatedText = text.length > 30 ? text.substring(0, 27) + '...' : text;
+                            return {
+                                text: truncatedText,
+                                fillStyle: dataset.backgroundColor,
+                                hidden: !chart.isDatasetVisible(i),
+                                lineCap: dataset.borderCapStyle,
+                                lineDash: dataset.borderDash,
+                                lineDashOffset: dataset.borderDashOffset,
+                                lineJoin: dataset.borderJoinStyle,
+                                lineWidth: dataset.borderWidth,
+                                strokeStyle: dataset.borderColor,
+                                pointStyle: dataset.pointStyle,
+                                datasetIndex: i
+                            };
+                        });
+                    }
                 },
                 position: 'right'
             }
-        }
+        },
+        maintainAspectRatio: false
     };
 
     return (

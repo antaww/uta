@@ -169,6 +169,7 @@ body.modal-open {
 
 .comparison-options {
     flex: 0 0 300px;
+    max-width: 40%;
 }
 
 .comparison-chart {
