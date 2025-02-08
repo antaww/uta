@@ -83,7 +83,7 @@ function Navbar() {
           </ul>
           <div className="nav-end d-flex align-items-center">
             {user ? (
-              <button className="btn btn-danger red-btn logout-btn" onClick={handleLogout}>
+              <button className="btn btn-danger d-flex red-btn logout-btn" onClick={handleLogout}>
                 <FaSignOutAlt size={16} />
                 <span>Logout</span>
               </button>
