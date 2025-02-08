@@ -9,6 +9,16 @@
     align-items: center;
     justify-content: center;
     z-index: 1050;
+    overflow: hidden;
+}
+
+/* Style pour bloquer le scroll du body */
+body.modal-open {
+    overflow: hidden !important;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: var(--scroll-position, 0);
 }
 
 .modal-content {    
