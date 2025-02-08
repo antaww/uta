@@ -33,7 +33,7 @@
 }
 
 .modal-title {
-    margin: 0;
+    margin-bottom: 1rem !important;
     font-weight: 600;
     color: white;
 }
@@ -80,7 +80,10 @@
 }
 
 .info-section h6 {
-    color: #fff;
+    color: #868686;
+    margin-bottom: 1rem;
+    font-weight: bold;
+    text-transform: uppercase;
     margin-bottom: 1rem;
 }
 
@@ -151,7 +154,7 @@
 .comparison-container {
     display: flex;
     gap: 2rem;
-    align-items: flex-start;
+    align-items: center;
 }
 
 .comparison-options {

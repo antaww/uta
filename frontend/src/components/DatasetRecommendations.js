@@ -199,7 +199,7 @@ const DatasetRecommendations = () => {
             >
                 {recommendationDetails.based_on.input_songs?.length > 0 && (
                     <div className="info-section">
-                        <h6>Input Songs Features:</h6>
+                        <h6>Input Songs Features</h6>
                         <div className="table-responsive">
                             <table className="table table-sm">
                                 <thead>
@@ -232,11 +232,47 @@ const DatasetRecommendations = () => {
                 )}
 
                 {recommendations.length > 0 && (
+                    <div className="info-section mt-4">
+                        <h6>Recommended Songs Features</h6>
+                        <div className="table-responsive">
+                            <table className="table table-sm">
+                                <thead>
+
+                                    <tr>
+                                        <th>Song</th>
+                                        <th>Valence</th>
+                                        <th>Energy</th>
+                                        <th>Danceability</th>
+                                        <th>Acousticness</th>
+                                        <th>Instrumentalness</th>
+                                        <th>Tempo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {recommendations.map((song, index) => (
+                                        <tr key={index}>
+                                            <td>{song.name}</td>
+                                            <td>{song.valence}</td>
+                                            <td>{song.energy}</td>
+                                            <td>{song.danceability}</td>
+                                            <td>{song.acousticness}</td>
+                                            <td>{song.instrumentalness}</td>
+                                            <td>{song.tempo}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
+{recommendations.length > 0 && (
                     <div className="info-section">
                         <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h6 className="mb-0">Features Comparison:</h6>
+                            <h6 className="mb-0">Features Comparison</h6>
                         </div>
                         <div className="comparison-container">
+
                             <div className="comparison-options">
                                 {recommendations.map((song, index) => (
                                     <div key={index} className="form-check">
@@ -269,40 +305,6 @@ const DatasetRecommendations = () => {
                                     />
                                 )}
                             </div>
-                        </div>
-                    </div>
-                )}
-
-                {recommendations.length > 0 && (
-                    <div className="info-section mt-4">
-                        <h6>Recommended Songs Features:</h6>
-                        <div className="table-responsive">
-                            <table className="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Song</th>
-                                        <th>Valence</th>
-                                        <th>Energy</th>
-                                        <th>Danceability</th>
-                                        <th>Acousticness</th>
-                                        <th>Instrumentalness</th>
-                                        <th>Tempo</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {recommendations.map((song, index) => (
-                                        <tr key={index}>
-                                            <td>{song.name}</td>
-                                            <td>{song.valence}</td>
-                                            <td>{song.energy}</td>
-                                            <td>{song.danceability}</td>
-                                            <td>{song.acousticness}</td>
-                                            <td>{song.instrumentalness}</td>
-                                            <td>{song.tempo}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
                         </div>
                     </div>
                 )}

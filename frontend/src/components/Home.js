@@ -130,8 +130,13 @@ function Home() {
 		<div className="container mt-4">
 			{user ? (
 				<>
+				<div className="d-flex align-items-center gap-3">
+						<img src={user.images[0].url} alt={user.display_name} className="profile-icon"/>
+						<h2 className="fat-text">Welcome, {user.display_name}!</h2>
+					</div>
+					<hr/>
 					<DatasetRecommendations />
-
+					<hr/>
 					<RecommendationSection
 						title="Recommendations based on your History"
 						recommendations={historyRecommendations}
@@ -140,11 +145,7 @@ function Home() {
 						onShowDetails={() => setShowHistoryModal(true)}
 					/>
 
-					<div className="d-flex align-items-center gap-3">
-						<img src={user.images[0].url} alt={user.display_name} className="profile-icon"/>
-						<h2 className="fat-text">Welcome, {user.display_name}!</h2>
-					</div>
-					<hr/>
+					
 
 					<div className="mb-4">
 						<h5>Target Popularity for Recommendations</h5>
