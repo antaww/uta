@@ -9,13 +9,10 @@ const InfoModal = ({ show, onClose, title, children }) => {
             <div className="modal-content" onClick={e => e.stopPropagation()}>
                 <div className="modal-header">
                     <h5 className="modal-title">{title}</h5>
-                    <button type="button" className="btn-close" onClick={onClose}></button>
+                    <button type="button" className="btn-close" onClick={onClose} aria-label="Close"></button>
                 </div>
                 <div className="modal-body">
                     {children}
-                </div>
-                <div className="modal-footer">
-                    <button type="button" className="btn btn-secondary" onClick={onClose}>Close</button>
                 </div>
             </div>
         </div>

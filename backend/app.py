@@ -101,6 +101,25 @@ def recommend_songs(song_list, spotify_data, n_songs=9):
     
     # Obtenir le vecteur moyen des chansons d'entrée
     song_center = get_mean_vector(song_list, spotify_data)
+    input_songs_data = []
+    for song in song_list:
+        song_data = get_song_data(song, spotify_data)
+        if song_data is not None:
+            input_songs_data.append({
+                'name': song_data['name'],
+                'year': int(song_data['year']),
+                'artists': song_data['artists'],
+                'valence': float(song_data['valence']),
+                'acousticness': float(song_data['acousticness']),
+                'danceability': float(song_data['danceability']),
+                'energy': float(song_data['energy']),
+                'instrumentalness': float(song_data['instrumentalness']),
+                'liveness': float(song_data['liveness']),
+                'loudness': float(song_data['loudness']),
+                'speechiness': float(song_data['speechiness']),
+                'tempo': float(song_data['tempo'])
+            })
+
     if song_center is None:
         # Si aucune chanson d'entrée n'est trouvée, retourner des recommandations aléatoires
         recommendations = spotify_data.sample(n=n_songs)
@@ -129,10 +148,19 @@ def recommend_songs(song_list, spotify_data, n_songs=9):
         results.append({
             'name': song['name'],
             'year': int(song['year']),
-            'artists': song['artists']
+            'artists': song['artists'],
+            'valence': float(song['valence']),
+            'acousticness': float(song['acousticness']),
+            'danceability': float(song['danceability']),
+            'energy': float(song['energy']),
+            'instrumentalness': float(song['instrumentalness']),
+            'liveness': float(song['liveness']),
+            'loudness': float(song['loudness']),
+            'speechiness': float(song['speechiness']),
+            'tempo': float(song['tempo'])
         })
     
-    return results
+    return results, input_songs_data
 
 @app.route('/login')
 def login():
@@ -696,8 +724,13 @@ def get_dataset_recommendations():
         if not input_songs:
             return jsonify({'error': 'No input songs provided'}), 400
 
-        recommendations = recommend_songs(input_songs, data)
-        return jsonify({'recommendations': recommendations})
+        recommendations, input_songs_data = recommend_songs(input_songs, data)
+        return jsonify({
+            'recommendations': recommendations,
+            'based_on': {
+                'input_songs': input_songs_data
+            }
+        })
 
     except Exception as e:
         print(f"Error generating dataset recommendations: {e}")

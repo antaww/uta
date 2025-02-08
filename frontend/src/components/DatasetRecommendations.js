@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import InfoModal from './InfoModal';
 
 const DatasetRecommendations = () => {
     const [selectedSongs, setSelectedSongs] = useState([]);
@@ -8,6 +9,13 @@ const DatasetRecommendations = () => {
     const [recommendations, setRecommendations] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [showDetailsModal, setShowDetailsModal] = useState(false);
+    const [recommendationDetails, setRecommendationDetails] = useState({
+        recommendations: [],
+        based_on: {
+            input_songs: []
+        }
+    });
 
     const handleSearch = async (query) => {
         if (!query.trim()) {
@@ -59,6 +67,7 @@ const DatasetRecommendations = () => {
                 withCredentials: true
             });
             setRecommendations(response.data.recommendations);
+            setRecommendationDetails(response.data);
         } catch (err) {
             console.error('Error getting recommendations:', err);
             setError('Failed to get recommendations');
@@ -144,7 +153,15 @@ const DatasetRecommendations = () => {
             {/* Recommendations */}
             {recommendations.length > 0 && (
                 <div className="mt-3">
-                    <h5>Recommendations:</h5>
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                        <h5 className="mb-0">Recommendations:</h5>
+                        <button 
+                            className="btn btn-outline-primary"
+                            onClick={() => setShowDetailsModal(true)}
+                        >
+                            <i className="bi bi-info-circle"></i> View Details
+                        </button>
+                    </div>
                     <table className="table table-striped">
                         <thead className="table-dark">
                             <tr>
@@ -167,6 +184,81 @@ const DatasetRecommendations = () => {
                     </table>
                 </div>
             )}
+
+            {/* Details Modal */}
+            <InfoModal 
+                show={showDetailsModal} 
+                onClose={() => setShowDetailsModal(false)}
+                title="Recommendation Details"
+            >
+                {recommendationDetails.based_on.input_songs?.length > 0 && (
+                    <div className="info-section">
+                        <h6>Input Songs Features:</h6>
+                        <div className="table-responsive">
+                            <table className="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Song</th>
+                                        <th>Valence</th>
+                                        <th>Energy</th>
+                                        <th>Danceability</th>
+                                        <th>Acousticness</th>
+                                        <th>Instrumentalness</th>
+                                        <th>Tempo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {recommendationDetails.based_on.input_songs.map((song, index) => (
+                                        <tr key={index}>
+                                            <td>{song.name}</td>
+                                            <td>{song.valence}</td>
+                                            <td>{song.energy}</td>
+                                            <td>{song.danceability}</td>
+                                            <td>{song.acousticness}</td>
+                                            <td>{song.instrumentalness}</td>
+                                            <td>{song.tempo}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
+                {recommendations.length > 0 && (
+                    <div className="info-section mt-4">
+                        <h6>Recommended Songs Features:</h6>
+                        <div className="table-responsive">
+                            <table className="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Song</th>
+                                        <th>Valence</th>
+                                        <th>Energy</th>
+                                        <th>Danceability</th>
+                                        <th>Acousticness</th>
+                                        <th>Instrumentalness</th>
+                                        <th>Tempo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {recommendations.map((song, index) => (
+                                        <tr key={index}>
+                                            <td>{song.name}</td>
+                                            <td>{song.valence}</td>
+                                            <td>{song.energy}</td>
+                                            <td>{song.danceability}</td>
+                                            <td>{song.acousticness}</td>
+                                            <td>{song.instrumentalness}</td>
+                                            <td>{song.tempo}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+            </InfoModal>
         </div>
     );
 };
