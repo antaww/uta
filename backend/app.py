@@ -4,14 +4,18 @@ from flask_cors import CORS
 from flask_session import Session
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 from sklearn.metrics.pairwise import cosine_similarity
+from scipy.spatial.distance import cdist
 import os
 from dotenv import load_dotenv
 from urllib.parse import urlparse
 import traceback
 import random
 from spotipy.exceptions import SpotifyException
+import pandas as pd
+import ast
+from collections import defaultdict
 
 load_dotenv()
 
@@ -47,6 +51,88 @@ sp_oauth = SpotifyOAuth(
         "user-read-private"
     ]
 )
+
+# Charger le dataset
+data_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'exploration', 'Version_finale', 'data', 'data.csv')
+data = pd.read_csv(data_path)
+
+def get_song_data(song, spotify_data):
+    try:
+        name = song['name']
+        year = song['year']
+        mask = (spotify_data['name'].str.lower() == name.lower()) & (spotify_data['year'] == year)
+        return spotify_data[mask].iloc[0]
+    except:
+        return None
+
+def get_mean_vector(song_list, spotify_data):
+    song_vectors = []
+    
+    # Caractéristiques numériques à utiliser
+    number_cols = ['valence', 'year', 'acousticness', 'danceability', 'duration_ms', 'energy',
+                  'instrumentalness', 'key', 'liveness', 'loudness', 'mode', 'speechiness', 'tempo']
+    
+    for song in song_list:
+        song_data = get_song_data(song, spotify_data)
+        if song_data is None:
+            print(f'Warning: {song["name"]} does not exist in the database')
+            continue
+        song_vector = song_data[number_cols].values
+        song_vectors.append(song_vector)
+    
+    if not song_vectors:
+        return None
+    
+    song_matrix = np.array(list(song_vectors))
+    return np.mean(song_matrix, axis=0)
+
+def recommend_songs(song_list, spotify_data, n_songs=9):
+    """
+    Recommande des chansons basées sur les chansons d'entrée en utilisant les caractéristiques musicales
+    """
+    # Colonnes de métadonnées et caractéristiques numériques
+    metadata_cols = ['name', 'year', 'artists']
+    number_cols = ['valence', 'year', 'acousticness', 'danceability', 'duration_ms', 'energy',
+                  'instrumentalness', 'key', 'liveness', 'loudness', 'mode', 'speechiness', 'tempo']
+    
+    # Convertir la colonne artists de string à liste si ce n'est pas déjà fait
+    if isinstance(spotify_data.iloc[0]['artists'], str):
+        spotify_data['artists'] = spotify_data['artists'].apply(ast.literal_eval)
+    
+    # Obtenir le vecteur moyen des chansons d'entrée
+    song_center = get_mean_vector(song_list, spotify_data)
+    if song_center is None:
+        # Si aucune chanson d'entrée n'est trouvée, retourner des recommandations aléatoires
+        recommendations = spotify_data.sample(n=n_songs)
+    else:
+        # Normaliser les caractéristiques
+        scaler = StandardScaler()
+        scaled_data = scaler.fit_transform(spotify_data[number_cols])
+        scaled_song_center = scaler.transform(song_center.reshape(1, -1))
+        
+        # Calculer les distances
+        distances = cdist(scaled_data, scaled_song_center, 'cosine').reshape(-1)
+        
+        # Créer un masque pour exclure les chansons d'entrée
+        song_names = [song['name'].lower() for song in song_list]
+        song_years = [song['year'] for song in song_list]
+        mask = ~((spotify_data['name'].str.lower().isin(song_names)) & 
+                (spotify_data['year'].isin(song_years)))
+        
+        # Trier par similarité (1 - distance) et sélectionner les meilleures recommandations
+        spotify_data['distances'] = distances
+        recommendations = spotify_data[mask].nsmallest(n_songs, 'distances')
+    
+    # Formater les résultats
+    results = []
+    for _, song in recommendations.iterrows():
+        results.append({
+            'name': song['name'],
+            'year': int(song['year']),
+            'artists': song['artists']
+        })
+    
+    return results
 
 @app.route('/login')
 def login():
@@ -602,6 +688,50 @@ def get_custom_recommendations():
         print(f"Error generating custom recommendations: {e}")
         print(traceback.format_exc())
         return jsonify({'error': str(e)}), 500
+
+@app.route('/get_dataset_recommendations', methods=['POST'])
+def get_dataset_recommendations():
+    try:
+        input_songs = request.json.get('songs', [])
+        if not input_songs:
+            return jsonify({'error': 'No input songs provided'}), 400
+
+        recommendations = recommend_songs(input_songs, data)
+        return jsonify({'recommendations': recommendations})
+
+    except Exception as e:
+        print(f"Error generating dataset recommendations: {e}")
+        print(traceback.format_exc())
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/search_dataset_tracks', methods=['GET'])
+def search_dataset_tracks():
+    query = request.args.get('query', '').lower()
+    if not query or len(query.strip()) == 0:
+        return jsonify({'error': 'Query empty'}), 400
+
+    # Rechercher dans le dataset
+    # Convertir la colonne artists de string à liste si ce n'est pas déjà fait
+    if isinstance(data.iloc[0]['artists'], str):
+        data['artists'] = data['artists'].apply(ast.literal_eval)
+
+    # Filtrer les chansons qui correspondent à la recherche
+    mask = data['name'].str.lower().str.contains(query) | \
+           data['artists'].apply(lambda x: any(query in artist.lower() for artist in x))
+    
+    results = data[mask].head(10)  # Limiter à 10 résultats
+    
+    # Formater les résultats
+    tracks = []
+    for _, track in results.iterrows():
+        tracks.append({
+            'id': track['id'],  # Utiliser l'ID du dataset
+            'name': track['name'],
+            'artists': track['artists'],
+            'year': int(track['year'])
+        })
+    
+    return jsonify({'tracks': tracks})
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

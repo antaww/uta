@@ -7,6 +7,9 @@ backend/.cache
 backend/__pycache__
 
 exploration/flask_session
+exploration/Version_finale/.cache
+exploration/Version_finale/__pycache__
 
 frontend/node_modules
+
 
