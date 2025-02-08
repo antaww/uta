@@ -135,8 +135,6 @@ function CustomRecommendations({ onGetRecommendations, targetPopularity }) {
 
     return (
         <div className="custom-recommendations mb-4">
-            <h4 className="fat-text mb-3">Custom Recommendations</h4>
-            
             {/* Artists Section */}
             <div className="mb-3">
                 <h5>Select Artists (max 5)</h5>

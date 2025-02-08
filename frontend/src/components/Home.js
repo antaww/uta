@@ -39,6 +39,7 @@ function Home() {
 	const [showHistoryModal, setShowHistoryModal] = useState(false);
 	const [showCustomModal, setShowCustomModal] = useState(false);
 	const [targetPopularity, setTargetPopularity] = useState(50);
+	const [resultCount, setResultCount] = useState(10);
 
 	useEffect(() => {
 		// Vérifier si l'utilisateur est authentifié
@@ -82,7 +83,10 @@ function Home() {
 		setLoadingRecommendations(true);
 		try {
 			const response = await axios.get('/get_recommendations', {
-				params: { target_popularity: targetPopularity },
+				params: { 
+					target_popularity: targetPopularity,
+					limit: resultCount
+				},
 				withCredentials: true
 			});
 			setHistoryRecommendations(response.data);
@@ -130,40 +134,125 @@ function Home() {
 		<div className="container mt-4">
 			{user ? (
 				<>
-				<div className="d-flex align-items-center gap-3">
+					<div className="d-flex align-items-center gap-3">
 						<img src={user.images[0].url} alt={user.display_name} className="profile-icon"/>
 						<h2 className="fat-text">Welcome, {user.display_name}!</h2>
 					</div>
 					<hr/>
 					<DatasetRecommendations />
 					<hr/>
-					<RecommendationSection
-						title="Recommendations based on your History"
-						recommendations={historyRecommendations}
-						onRefresh={fetchHistoryRecommendations}
-						loading={loadingRecommendations}
-						onShowDetails={() => setShowHistoryModal(true)}
-					/>
 
-					
-
-					<div className="mb-4">
-						<h5>Target Popularity for Recommendations</h5>
-						<div className="d-flex align-items-center">
-							<input
-								type="range"
-								className="form-range"
-								min="0"
-								max="100"
-								value={targetPopularity}
-								onChange={(e) => setTargetPopularity(parseInt(e.target.value))}
-							/>
-							<span className="ms-2">{targetPopularity}</span>
+					<div>
+						<h4 className="fat-text mb-3">Recommendations based on your History</h4>
+						
+						<div className="mb-4">
+							<h5>Target Popularity for Recommendations</h5>
+							<div className="d-flex align-items-center">
+								<input
+									type="range"
+									className="form-range"
+									min="0"
+									max="100"
+									value={targetPopularity}
+									onChange={(e) => setTargetPopularity(parseInt(e.target.value))}
+								/>
+								<span className="ms-2">{targetPopularity}</span>
+							</div>
+							<small>
+								Higher values will recommend more popular tracks
+							</small>
 						</div>
-						<small>
-							Higher values will recommend more popular tracks
-						</small>
+
+						<div className="mb-4">
+							<h5>Number of Recommendations</h5>
+							<div className="d-flex align-items-center">
+								<input
+									type="range"
+									className="form-range"
+									min="1"
+									max="80"
+									value={resultCount}
+									onChange={(e) => setResultCount(parseInt(e.target.value))}
+								/>
+								<span className="ms-2">{resultCount}</span>
+							</div>
+							<small>
+								Choose how many recommendations you want to see (1-80)
+							</small>
+						</div>
+
+						<button
+							className="btn btn-primary green-btn"
+							onClick={fetchHistoryRecommendations}
+							disabled={loadingRecommendations}
+						>
+							{loadingRecommendations ? (
+								<span>
+									<span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+									Loading...
+								</span>
+							) : 'Get Recommendations'}
+						</button>
+
+						{historyRecommendations.tracks.length > 0 && (
+							<div className="mt-4">
+								<div className="d-flex justify-content-between align-items-center mb-3">
+									<button 
+										className="btn btn-outline-primary"
+										onClick={() => setShowHistoryModal(true)}
+									>
+										<i className="bi bi-info-circle"></i> View Details
+									</button>
+								</div>
+								<table className="table table-striped">
+									<thead className="table-dark">
+										<tr>
+											<th style={{width: '5%'}}>#</th>
+											<th style={{width: '20%'}}>Name</th>
+											<th style={{width: '20%'}}>Artist</th>
+											<th style={{width: '30%'}}>Album</th>
+											<th style={{width: '15%'}}>Listen</th>
+											<th style={{width: '10%'}}></th>
+										</tr>
+									</thead>
+									<tbody>
+										{historyRecommendations.tracks.map((track, index) => (
+											<tr key={index}>
+												<td>{index + 1}</td>
+												<td>{track.name}</td>
+												<td>{track.artists.map(a => a.name).join(', ')}</td>
+												<td>
+													<div className="d-flex align-items-center gap-3">
+														{track.album?.images?.[0]?.url && (
+															<img 
+																src={track.album.images[0].url} 
+																alt={track.album.name}
+																style={{ width: '40px', height: '40px', objectFit: 'cover' }}
+															/>
+														)}
+														<span>{track.album?.name || '-'}</span>
+													</div>
+												</td>
+												<td>
+													{track.preview_url ? (
+														<audio controls>
+															<source src={track.preview_url} type="audio/mpeg"/>
+															Your browser does not support the audio element.
+														</audio>
+													) : 'No preview available'}
+												</td>
+												<td>
+													<Track track={track} />
+												</td>
+											</tr>
+										))}
+									</tbody>
+								</table>
+							</div>
+						)}
 					</div>
+
+					<hr/>
 
 					<RecommendationSection 
 						title="Recommendations based on your Choices"

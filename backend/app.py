@@ -352,6 +352,7 @@ def get_recommendations():
 
     try:
         target_popularity = int(request.args.get('target_popularity', 50))
+        limit = int(request.args.get('limit', 10))  # Récupérer le paramètre limit avec une valeur par défaut de 10
         min_popularity = max(0, target_popularity - 10)
         max_popularity = min(100, target_popularity + 10)
 
@@ -407,7 +408,7 @@ def get_recommendations():
         for artist in top_artists_data['items']:
             try:
                 top_tracks = sp.artist_top_tracks(artist['id'], country=market)['tracks']
-                for track in top_tracks[:10]:
+                for track in top_tracks[:5]:  # Réduit de 10 à 5 pour avoir plus de variété
                     if track['id'] not in recent_track_ids:
                         similar_tracks.append({
                             'track': track,
@@ -427,7 +428,7 @@ def get_recommendations():
                 recommendations_results = sp.recommendations(
                     seed_artists=seed_artists[i:i+2],  # Utiliser différents artistes à chaque fois
                     seed_genres=seed_genres[i:i+3],    # Utiliser différents genres à chaque fois
-                    limit=30,
+                    limit=20,  # Réduit de 30 à 20
                     market=market,
                     min_popularity=min_popularity,
                     max_popularity=max_popularity
@@ -443,12 +444,12 @@ def get_recommendations():
             print(f"Erreur lors de la récupération des recommendations: {e}")
 
         # Rechercher des tracks similaires aux dernières écoutes
-        for recent_track in recent_tracks_formatted[:10]:
+        for recent_track in recent_tracks_formatted[:5]:  # Réduit de 10 à 5
             try:
                 seed_track = recent_track['id']
                 results = sp.recommendations(
                     seed_tracks=[seed_track],
-                    limit=10,
+                    limit=5,  # Réduit de 10 à 5
                     market=market,
                     min_popularity=min_popularity
                 )
@@ -462,9 +463,9 @@ def get_recommendations():
                 print(f"Erreur lors de la recherche de similaires pour {recent_track['name']}: {e}")
                 continue
 
-        # Mélanger et sélectionner plus de recommandations
+        # Mélanger et sélectionner le nombre de recommandations demandé
         random.shuffle(similar_tracks)
-        recommendations = similar_tracks[:80]  # Augmenté à 80
+        recommendations = similar_tracks[:limit]  # Utiliser le paramètre limit au lieu de 80
 
         # Formater la réponse
         formatted_response = {
@@ -479,7 +480,6 @@ def get_recommendations():
         print(f"Recommendations: {formatted_response}")
         preview_count = sum(1 for item in recommendations if item['track']['preview_url'] is not None)
         print(f"Nombre de previews disponibles : {preview_count}/{len(recommendations)}")
-        # todo: fix no preview available (0/40)
         return jsonify(formatted_response)
         
     except Exception as e:
