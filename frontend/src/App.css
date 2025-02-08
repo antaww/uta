@@ -27,20 +27,60 @@ body, .container, .navbar {
 
 .navbar {
     background: linear-gradient(98.85deg, rgba(18, 18, 18, 0.3) 0%, var(--primary-color) 100%), linear-gradient(180deg, rgba(18, 18, 18, 0) 0%, var(--primary-color) 100%), var(--spotify-green) !important;
+    padding: 0.5rem 1rem !important;
 }
 
 .navbar-brand {
     color: var(--white-1) !important;
 }
 
+.navbar .container-fluid {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 64px;
+}
+
+.navbar-nav {
+    flex: 1;
+    justify-content: center;
+}
+
 .nav-link {
     color: var(--white-1) !important;
     opacity: 0.8;
-    transition: opacity 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    padding: 0.5rem 1rem !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .nav-link:hover {
     opacity: 1;
+    color: var(--spotify-green) !important;
+    transform: scale(1.1);
+}
+
+.nav-link.active {
+    color: var(--spotify-green) !important;
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.nav-link svg {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.navbar-nav .nav-item {
+    display: flex;
+    align-items: center;
 }
 
 .green-btn {
@@ -275,4 +315,23 @@ tr:last-child {
 
 .navbar-toggler-icon {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.7%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+.text-spotify {
+    color: var(--spotify-green) !important;
+}
+
+.hover-card {
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(30, 215, 96, 0.2);
+}
+
+.nav-end {
+    height: 100%;
+    padding: 0.5rem 0;
 }

@@ -1,11 +1,12 @@
 // src/components/Navbar.js
 import React, { useContext } from 'react';
-import { Link } from 'react-router-dom';
-import { FaSpotify } from 'react-icons/fa';
+import { Link, useLocation } from 'react-router-dom';
+import { FaSpotify, FaMusic, FaHistory, FaUserEdit, FaListUl, FaSignOutAlt } from 'react-icons/fa';
 import { UserContext } from '../context/UserContext';
 
 function Navbar() {
   const { user } = useContext(UserContext);
+  const location = useLocation();
 
   const handleLogin = () => {
     window.location.href = 'http://localhost:5000/login';
@@ -13,6 +14,10 @@ function Navbar() {
 
   const handleLogout = () => {
     window.location.href = 'http://localhost:3000/logout';
+  };
+
+  const isActive = (path) => {
+    return location.pathname === path;
   };
 
   return (
@@ -34,35 +39,58 @@ function Navbar() {
           <span className="navbar-toggler-icon"></span>
         </button>
         <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+          <ul className="navbar-nav">
             {user && (
               <>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/dataset-recommendations">Dataset Recommendations</Link>
+                  <Link 
+                    className={`nav-link ${isActive('/dataset-recommendations') ? 'active' : ''}`}
+                    to="/dataset-recommendations" 
+                    title="Dataset Recommendations"
+                  >
+                    <FaMusic size={20} />
+                  </Link>
                 </li>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/history-recommendations">History Recommendations</Link>
+                  <Link 
+                    className={`nav-link ${isActive('/history-recommendations') ? 'active' : ''}`}
+                    to="/history-recommendations"
+                    title="History Recommendations"
+                  >
+                    <FaHistory size={20} />
+                  </Link>
                 </li>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/custom-recommendations">Custom Recommendations</Link>
+                  <Link 
+                    className={`nav-link ${isActive('/custom-recommendations') ? 'active' : ''}`}
+                    to="/custom-recommendations"
+                    title="Custom Recommendations"
+                  >
+                    <FaUserEdit size={20} />
+                  </Link>
                 </li>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/playlists">Your Playlists</Link>
+                  <Link 
+                    className={`nav-link ${isActive('/playlists') ? 'active' : ''}`}
+                    to="/playlists"
+                    title="Your Playlists"
+                  >
+                    <FaListUl size={20} />
+                  </Link>
                 </li>
               </>
             )}
           </ul>
-          <ul className="navbar-nav">
+          <div className="nav-end d-flex align-items-center">
             {user ? (
-              <li className="nav-item">
-                <button className="btn btn-danger red-btn" onClick={handleLogout}>Logout</button>
-              </li>
+              <button className="btn btn-danger red-btn logout-btn" onClick={handleLogout}>
+                <FaSignOutAlt size={16} />
+                <span>Logout</span>
+              </button>
             ) : (
-              <li className="nav-item">
-                <button className="btn btn-success me-2 green-btn" onClick={handleLogin}>Login</button>
-              </li>
+              <button className="btn btn-success me-2 green-btn" onClick={handleLogin}>Login</button>
             )}
-          </ul>
+          </div>
         </div>
       </div>
     </nav>

@@ -83,8 +83,8 @@ const DatasetRecommendations = () => {
     };
 
     return (
-        <div className="mb-5">
-            <h4 className="fat-text mb-3">Recommendations based on dataset</h4>
+        <div className="container mt-4">
+            <h2 className="fat-text mb-4">Recommendations based on dataset</h2>
             
             {/* Search input */}
             <div className="mb-3">
