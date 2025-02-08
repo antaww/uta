@@ -90,13 +90,16 @@ const SongComparisonChart = ({ inputSong, comparedSongs }) => {
                     boxWidth: 20,
                     padding: 10,
                     textOverflow: 'ellipsis',
-                    maxWidth: 200,
+                    maxWidth: 150,
+                    font: {
+                        size: 12
+                    },
                     generateLabels: (chart) => {
                         const datasets = chart.data.datasets;
                         return datasets.map((dataset, i) => {
                             const text = dataset.label || '';
-                            // Tronquer le texte s'il dépasse 30 caractères
-                            const truncatedText = text.length > 30 ? text.substring(0, 27) + '...' : text;
+                            // Tronquer le texte s'il dépasse 25 caractères
+                            const truncatedText = text.length > 25 ? text.substring(0, 22) + '...' : text;
                             return {
                                 text: truncatedText,
                                 fillStyle: dataset.backgroundColor,
@@ -113,10 +116,17 @@ const SongComparisonChart = ({ inputSong, comparedSongs }) => {
                         });
                     }
                 },
-                position: 'right'
+                position: 'right',
+                maxWidth: 150,
+                maxHeight: 400
             }
         },
-        maintainAspectRatio: false
+        maintainAspectRatio: false,
+        layout: {
+            padding: {
+                right: 150 // Espace fixe pour la légende
+            }
+        }
     };
 
     return (

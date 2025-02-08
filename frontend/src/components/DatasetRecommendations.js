@@ -194,7 +194,10 @@ const DatasetRecommendations = () => {
             {/* Details Modal */}
             <InfoModal 
                 show={showDetailsModal} 
-                onClose={() => setShowDetailsModal(false)}
+                onClose={() => {
+                    setShowDetailsModal(false);
+                    setSelectedComparisonSong([]);
+                }}
                 title="Recommendation Details"
             >
                 {recommendationDetails.based_on.input_songs?.length > 0 && (
@@ -275,23 +278,47 @@ const DatasetRecommendations = () => {
 
                             <div className="comparison-options">
                                 {recommendations.map((song, index) => (
-                                    <div key={index} className="form-check">
+                                    <div 
+                                        key={index} 
+                                        className="form-check" 
+                                        style={{ 
+                                            cursor: 'pointer',
+                                            whiteSpace: 'nowrap',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            maxWidth: '100%'
+                                        }}
+                                        onClick={() => {
+                                            const isSelected = selectedComparisonSong.some(s => s.name === song.name);
+                                            if (isSelected) {
+                                                setSelectedComparisonSong(prev => 
+                                                    prev.filter(s => s.name !== song.name)
+                                                );
+                                            } else {
+                                                setSelectedComparisonSong(prev => [...prev, song]);
+                                            }
+                                        }}
+                                    >
                                         <input
                                             type="checkbox"
                                             className="form-check-input"
                                             id={`compare-song-${index}`}
                                             checked={selectedComparisonSong.some(s => s.name === song.name)}
-                                            onChange={(e) => {
-                                                if (e.target.checked) {
-                                                    setSelectedComparisonSong(prev => [...prev, song]);
-                                                } else {
-                                                    setSelectedComparisonSong(prev => 
-                                                        prev.filter(s => s.name !== song.name)
-                                                    );
-                                                }
-                                            }}
+                                            onChange={() => {}}
                                         />
-                                        <label className="form-check-label" htmlFor={`compare-song-${index}`}>
+                                        <label 
+                                            className="form-check-label" 
+                                            htmlFor={`compare-song-${index}`}
+                                            style={{
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                width: '100%',
+                                                display: 'block'
+                                            }}
+                                            onClick={(e) => e.preventDefault()}
+                                            title={`${song.name} - ${Array.isArray(song.artists) ? song.artists.join(', ') : song.artists}`}
+                                        >
                                             {song.name} - {Array.isArray(song.artists) ? song.artists.join(', ') : song.artists}
                                         </label>
                                     </div>
