@@ -309,28 +309,49 @@ def get_playlist_details():
     if not playlist_id:
         return jsonify({'error': 'Missing playlist_id'}), 400
 
-    try:
-        playlist = sp.playlist(playlist_id)
-        tracks = playlist['tracks']['items']
-        all_tracks = []
-        while playlist['tracks']['next']:
-            playlist = sp.next(playlist['tracks'])
-            tracks.extend(playlist['items'])
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 50))
+    offset = (page - 1) * per_page
 
-        for item in tracks:
-            track = item['track']
-            all_tracks.append({
-                'id': track['id'],
-                'name': track['name'],
-                'artist': ', '.join([artist['name'] for artist in track['artists']]),
-                'album': track['album']['name'],
-                'preview_url': track['preview_url'],
-                'external_url': track['external_urls']['spotify']
-            })
+    try:
+        # Récupérer les informations de base de la playlist
+        playlist = sp.playlist(playlist_id, fields='name,tracks.total')
+        total_tracks = playlist['tracks']['total']
+        
+        # Récupérer la page demandée
+        tracks_page = sp.playlist_tracks(
+            playlist_id,
+            offset=offset,
+            limit=per_page,
+            fields='items(track(id,name,artists(name),album(name),preview_url,external_urls))'
+        )
+        
+        tracks = []
+        for item in tracks_page['items']:
+            track = item.get('track')
+            if track:  # Vérifier que la piste existe (pas été supprimée)
+                try:
+                    tracks.append({
+                        'id': track.get('id', ''),
+                        'name': track.get('name', 'Unknown Title'),
+                        'artist': ', '.join(artist.get('name', 'Unknown Artist') for artist in track.get('artists', [])),
+                        'album': track.get('album', {}).get('name', 'Unknown Album'),
+                        'preview_url': track.get('preview_url'),
+                        'external_url': track.get('external_urls', {}).get('spotify', '')
+                    })
+                except Exception as track_error:
+                    print(f"Error processing track: {track_error}")
+                    continue  # Passer à la piste suivante en cas d'erreur
 
         return jsonify({
-            'playlist_name': playlist['name'],
-            'tracks': all_tracks
+            'playlist_name': playlist.get('name', 'Unknown Playlist'),
+            'tracks': tracks,
+            'pagination': {
+                'total': total_tracks,
+                'per_page': per_page,
+                'current_page': page,
+                'total_pages': (total_tracks + per_page - 1) // per_page
+            }
         })
     except spotipy.exceptions.SpotifyException as e:
         error_message = f"SpotifyException: {str(e)}"
