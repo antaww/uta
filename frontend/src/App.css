@@ -1,4 +1,21 @@
+/* Base styles from index.css */
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+        monospace;
+}
+
+/* Main App styles */
 :root {
+
     --white-1: #f2f2f2;
     --white-2: #e5e5e5;
     --btn-color: #333333;
@@ -334,4 +351,11 @@ tr:last-child {
 .nav-end {
     height: 100%;
     padding: 0.5rem 0;
+}
+
+/* Style pour les boutons désactivés */
+button:disabled,
+.btn:disabled {
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
 }
