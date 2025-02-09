@@ -52,8 +52,6 @@ const ArtistSearch = ({ selectedArtists, setSelectedArtists }) => {
     const handleSelect = (artist) => {
         if (!selectedArtists.includes(artist.id)) {
             setSelectedArtists([...selectedArtists, artist.id]);
-            setQuery('');
-            setResults([]);
         }
     };
 
