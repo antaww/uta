@@ -358,4 +358,26 @@ button:disabled,
 .btn:disabled {
     cursor: not-allowed !important;
     opacity: 0.6 !important;
+    pointer-events: all !important;
+}
+
+/* Style pour les cartes désactivées */
+.card.disabled {
+    pointer-events: none !important;
+    opacity: 0.6 !important;
+}
+
+.card.disabled * {
+    cursor: not-allowed !important;
+    pointer-events: all !important;
+}
+
+.hover-card.disabled {
+    pointer-events: none !important;
+    opacity: 0.6 !important;
+}
+
+.hover-card.disabled * {
+    cursor: not-allowed !important;
+    pointer-events: all !important;
 }
