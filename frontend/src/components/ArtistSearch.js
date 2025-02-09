@@ -74,7 +74,7 @@ const ArtistSearch = ({ onSelect, selectedArtists }) => {
                 {results.map(artist => (
                     <button
                         key={artist.id}
-                        className="btn btn-sm btn-outline-primary me-2 mb-2"
+                        className="btn btn-sm btn-outline-secondary me-2 mb-2"
                         onClick={() => onSelect(artist)}
                         disabled={selectedArtists.includes(artist.id)}
                     >
