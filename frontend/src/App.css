@@ -67,27 +67,26 @@ body, .container, .navbar {
 .nav-link {
     color: var(--white-1) !important;
     opacity: 0.8;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    padding: 0.5rem 1rem !important;
-    display: flex;
+    transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    padding: 0.25rem !important;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    margin: 0 0.75rem;
 }
 
 .nav-link:hover {
     opacity: 1;
     color: var(--uta-primary) !important;
-    transform: scale(1.1);
 }
 
 .nav-link.active {
     color: var(--uta-primary) !important;
     opacity: 1;
-    transform: scale(1.1);
 }
 
 .nav-link svg {
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .logout-btn {
