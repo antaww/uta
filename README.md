@@ -20,20 +20,19 @@ pip install -r requirements.txt
 
 ### Install Node.js
 ```bash
-cd frontend
-npm install
+cd frontend; npm install
 ```
+
 
 ### Run the server
 ```bash
-cd backend
-python app.py
+cd backend; python app.py
 ```
+
 
 ### Run the frontend
 ```bash
-cd frontend
-npm start
+cd frontend; npm start
 ```
 
 (in case of 3000 port is already in use) : 
