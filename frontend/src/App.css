@@ -20,8 +20,9 @@ code {
     --white-2: #e5e5e5;
     --btn-color: #333333;
     --primary-color: #121212;
-    --spotify-green: #1ed760;
-    --spotify-green-hover: #21ed6a;
+    --uta-primary: #e34b52;
+    --rgba-uta-primary: rgba(227, 75, 82, 0.2);
+    --uta-primary-hover: #fc6067;
     --btn-red: #f82938;
     --btn-red-hover: #fd3645;
     --card-bg: #282828;
@@ -43,7 +44,7 @@ body, .container, .navbar {
 }
 
 .navbar {
-    background: linear-gradient(98.85deg, rgba(18, 18, 18, 0.3) 0%, var(--primary-color) 100%), linear-gradient(180deg, rgba(18, 18, 18, 0) 0%, var(--primary-color) 100%), var(--spotify-green) !important;
+    background: linear-gradient(98.85deg, rgba(18, 18, 18, 0.3) 0%, var(--primary-color) 100%), linear-gradient(180deg, rgba(18, 18, 18, 0) 0%, var(--primary-color) 100%), var(--uta-primary) !important;
     padding: 0.5rem 1rem !important;
 }
 
@@ -75,12 +76,12 @@ body, .container, .navbar {
 
 .nav-link:hover {
     opacity: 1;
-    color: var(--spotify-green) !important;
+    color: var(--uta-primary) !important;
     transform: scale(1.1);
 }
 
 .nav-link.active {
-    color: var(--spotify-green) !important;
+    color: var(--uta-primary) !important;
     opacity: 1;
     transform: scale(1.1);
 }
@@ -101,8 +102,8 @@ body, .container, .navbar {
 }
 
 .green-btn {
-    background-color: var(--spotify-green) !important;
-    border-color: var(--spotify-green) !important;
+    background-color: var(--uta-primary) !important;
+    border-color: var(--uta-primary) !important;
     color: var(--primary-color) !important;
     font-weight: 700 !important;
     padding: 0.5rem 2rem !important;
@@ -110,7 +111,7 @@ body, .container, .navbar {
 }
 
 .green-btn:hover {
-    background-color: var(--spotify-green-hover) !important;
+    background-color: var(--uta-primary-hover) !important;
 }
 
 .red-btn {
@@ -282,8 +283,8 @@ tr:last-child {
 }
 
 .list-group-item.active {
-    background-color: var(--spotify-green) !important;
-    border-color: var(--spotify-green) !important;
+    background-color: var(--uta-primary) !important;
+    border-color: var(--uta-primary) !important;
 }
 
 /* Styles pour les formulaires */
@@ -295,8 +296,8 @@ tr:last-child {
 
 .form-control:focus, .form-select:focus {
     background-color: rgba(255, 255, 255, 0.15) !important;
-    border-color: var(--spotify-green) !important;
-    box-shadow: 0 0 0 0.25rem rgba(30, 215, 96, 0.25) !important;
+    border-color: var(--uta-primary) !important;
+    box-shadow: 0 0 0 0.25rem var(--rgba-uta-primary) !important;
 }
 
 .form-control::placeholder {
@@ -309,7 +310,7 @@ tr:last-child {
 }
 
 .info-section h6 {
-    color: var(--spotify-green);
+    color: var(--uta-primary);
     margin-bottom: 0.5rem;
 }
 
@@ -335,7 +336,7 @@ tr:last-child {
 }
 
 .text-spotify {
-    color: var(--spotify-green) !important;
+    color: var(--uta-primary) !important;
 }
 
 .hover-card {
@@ -345,7 +346,7 @@ tr:last-child {
 
 .hover-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(30, 215, 96, 0.2);
+    box-shadow: 0 8px 16px var(--rgba-uta-primary);
 }
 
 .nav-end {

@@ -1,8 +1,9 @@
 // src/components/Navbar.js
 import React, { useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaSpotify, FaMusic, FaHistory, FaUserEdit, FaListUl, FaSignOutAlt } from 'react-icons/fa';
+import { FaMusic, FaHistory, FaUserEdit, FaListUl, FaSignOutAlt } from 'react-icons/fa';
 import { UserContext } from '../context/UserContext';
+import logo from '../assets/logo.png';
 
 function Navbar() {
   const { user } = useContext(UserContext);
@@ -24,7 +25,7 @@ function Navbar() {
     <nav className="navbar navbar-expand-lg">
       <div className="container-fluid">
         <Link className="fat-text navbar-brand d-flex align-items-center" to="/home">
-          <FaSpotify size={30} className="me-2" />
+          <img src={logo} alt="UTA Logo" style={{ height: '30px', marginRight: '10px' }} />
           UTA
         </Link>
         <button 
