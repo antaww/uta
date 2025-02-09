@@ -25,8 +25,8 @@ function Navbar() {
     <nav className="navbar navbar-expand-lg">
       <div className="container-fluid">
         <Link className="fat-text navbar-brand d-flex align-items-center" to="/home">
-          <img src={logo} alt="UTA Logo" style={{ height: '30px', marginRight: '10px' }} />
-          UTA
+          <img src={logo} alt="UTA Logo" style={{ height: '4rem', marginRight: '10px' }} />
+          <span style={{ fontSize: '2rem', fontWeight: 800, letterSpacing: '.2rem' }}>UTA</span>
         </Link>
         <button 
           className="navbar-toggler" 
