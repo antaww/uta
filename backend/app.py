@@ -559,6 +559,35 @@ def search_artists():
         print(f"Error searching artists: {e}")
         return jsonify({'error': str(e)}), e.http_status
 
+@app.route('/get_artists_details', methods=['GET'])
+def get_artists_details():
+    sp = get_spotify_client()
+    if not sp:
+        return jsonify({'error': 'User not authenticated'}), 401
+
+    artist_ids = request.args.get('ids', '').split(',')
+    if not artist_ids or not artist_ids[0]:
+        return jsonify({'error': 'No artist IDs provided'}), 400
+
+    try:
+        # Récupérer les détails des artistes par lots de 50 (limite de l'API Spotify)
+        artists_details = []
+        for i in range(0, len(artist_ids), 50):
+            batch = artist_ids[i:i + 50]
+            results = sp.artists(batch)
+            for artist in results['artists']:
+                if artist:
+                    artists_details.append({
+                        'id': artist['id'],
+                        'name': artist['name'],
+                        'image': artist['images'][0]['url'] if artist['images'] else None
+                    })
+        
+        return jsonify({'artists': artists_details})
+    except Exception as e:
+        print(f"Error fetching artist details: {e}")
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/search_tracks', methods=['GET'])
 def search_tracks():
     sp = get_spotify_client()

@@ -1,10 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const ArtistSearch = ({ onSelect, selectedArtists }) => {
+const ArtistSearch = ({ selectedArtists, setSelectedArtists }) => {
     const [query, setQuery] = useState('');
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [selectedArtistDetails, setSelectedArtistDetails] = useState([]);
+
+    // Charger les détails des artistes sélectionnés
+    useEffect(() => {
+        const fetchArtistDetails = async () => {
+            if (selectedArtists.length === 0) {
+                setSelectedArtistDetails([]);
+                return;
+            }
+
+            try {
+                const response = await axios.get('/get_artists_details', {
+                    params: { ids: selectedArtists.join(',') },
+                    withCredentials: true
+                });
+                setSelectedArtistDetails(response.data.artists);
+            } catch (err) {
+                console.error('Error fetching artist details:', err);
+            }
+        };
+
+        fetchArtistDetails();
+    }, [selectedArtists]);
 
     const searchArtists = async (searchQuery) => {
         if (!searchQuery.trim()) {
@@ -24,6 +47,18 @@ const ArtistSearch = ({ onSelect, selectedArtists }) => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleSelect = (artist) => {
+        if (!selectedArtists.includes(artist.id)) {
+            setSelectedArtists([...selectedArtists, artist.id]);
+            setQuery('');
+            setResults([]);
+        }
+    };
+
+    const handleRemove = (artistId) => {
+        setSelectedArtists(selectedArtists.filter(id => id !== artistId));
     };
 
     // Debounce la recherche pour éviter trop de requêtes
@@ -51,6 +86,7 @@ const ArtistSearch = ({ onSelect, selectedArtists }) => {
 
     return (
         <div>
+            {/* Barre de recherche */}
             <input
                 type="text"
                 className="form-control"
@@ -64,36 +100,70 @@ const ArtistSearch = ({ onSelect, selectedArtists }) => {
                     debouncedSearch(e.target.value);
                 }}
             />
+
+            {/* Indicateur de chargement */}
             {loading && (
                 <div className="mt-2">
                     <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                     Searching...
                 </div>
             )}
-            <div className="search-results mt-2">
-                {results.map(artist => (
-                    <button
-                        key={artist.id}
-                        className="btn btn-sm btn-outline-secondary me-2 mb-2"
-                        onClick={() => onSelect(artist)}
-                        disabled={selectedArtists.includes(artist.id)}
-                    >
-                        {artist.image && (
-                            <img 
-                                src={artist.image} 
-                                alt={artist.name} 
-                                style={{
-                                    width: '20px', 
-                                    height: '20px', 
-                                    borderRadius: '50%',
-                                    marginRight: '8px'
-                                }}
-                            />
-                        )}
-                        {artist.name}
-                    </button>
-                ))}
-            </div>
+
+            {/* Résultats de recherche */}
+            {results.length > 0 && (
+                <div className="search-results mt-2">
+                    {results.map(artist => (
+                        <button
+                            key={artist.id}
+                            className="btn btn-sm btn-outline-secondary me-2 mb-2"
+                            onClick={() => handleSelect(artist)}
+                            disabled={selectedArtists.includes(artist.id)}
+                        >
+                            {artist.image && (
+                                <img 
+                                    src={artist.image} 
+                                    alt={artist.name} 
+                                    style={{
+                                        width: '20px', 
+                                        height: '20px', 
+                                        borderRadius: '50%',
+                                        marginRight: '8px'
+                                    }}
+                                />
+                            )}
+                            {artist.name}
+                        </button>
+                    ))}
+                </div>
+            )}
+
+            {/* Artistes sélectionnés */}
+            {selectedArtistDetails.length > 0 && (
+                <div className="search-results mt-3">
+                    {selectedArtistDetails.map(artist => (
+                        <button
+                            key={artist.id}
+                            className="btn btn-sm btn-outline-secondary me-2 mb-2"
+                            onClick={() => handleRemove(artist.id)}
+                        >
+                            {artist.image && (
+                                <img 
+                                    src={artist.image} 
+                                    alt={artist.name} 
+                                    style={{
+                                        width: '20px', 
+                                        height: '20px', 
+                                        borderRadius: '50%',
+                                        marginRight: '8px'
+                                    }}
+                                />
+                            )}
+                            {artist.name}
+                            <span className="ms-2">×</span>
+                        </button>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };

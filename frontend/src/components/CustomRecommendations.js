@@ -76,10 +76,6 @@ function CustomRecommendations({ standalone = false, onGetRecommendations = () =
             <ArtistSearch
                 selectedArtists={selectedArtists}
                 setSelectedArtists={setSelectedArtists}
-                selectedTracks={selectedTracks}
-                setSelectedTracks={setSelectedTracks}
-                selectedGenres={selectedGenres}
-                setSelectedGenres={setSelectedGenres}
             />
 
             <button
